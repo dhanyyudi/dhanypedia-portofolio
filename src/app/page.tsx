@@ -1,65 +1,133 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
+import Navigation from "@/components/Navigation";
+import ProjectOverlay from "@/components/ProjectOverlay";
+import type { Project } from "@/types";
+import './leaflet-custom.css';
+
+// Dynamic imports
+const Globe = dynamic(() => import("@/components/Globe"), { ssr: false });
+const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
 export default function Home() {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [activeProject, setActiveProject] = useState<Project | null>(null);
+  const [show2DMap, setShow2DMap] = useState(false);
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
+  
+  // Transition lock to prevent immediate re-trigger when returning from 2D
+  const isTransitioningRef = useRef(false);
+
+  // Fetch projects from Supabase API
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch('/api/projects');
+        if (response.ok) {
+          const data = await response.json();
+          setProjects(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch projects:', error);
+      }
+    };
+    fetchProjects();
+  }, []);
+
+  // Handle project selection (Click from List or Marker)
+  const handleProjectSelect = (project: Project) => {
+    setActiveProject(project);
+    setMapCenter({ lat: project.location.latitude, lng: project.location.longitude });
+    
+    // Delay for fly-to effect
+    setTimeout(() => {
+        setShow2DMap(true);
+    }, 1200);
+  };
+
+  // Handle Manual Zoom In from Globe (only for manual user zoom, not project clicks)
+  const handleManualZoomIn = (center: { lat: number, lng: number }) => {
+    // Block zoom-in during transition
+    if (isTransitioningRef.current) {
+      return;
+    }
+    
+    // Only trigger if we're not already showing 2D AND no project is being viewed
+    // This prevents clearing activeProject when user clicks a project from the list
+    if (!show2DMap && !activeProject) {
+        setMapCenter(center);
+        setShow2DMap(true);
+    }
+  };
+
+  const handleCloseProject = () => {
+    // Set transition lock to prevent immediate re-trigger
+    isTransitioningRef.current = true;
+    
+    // Set all states immediately
+    setShow2DMap(false);
+    setActiveProject(null);
+    setMapCenter(null);
+    
+    // Release lock after transition completes
+    setTimeout(() => {
+      isTransitioningRef.current = false;
+    }, 2500); // Wait for Globe's camera fly-out animation to complete
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="relative w-screen h-screen overflow-hidden bg-[var(--background-primary)]">
+      {/* Navigation */}
+      <Navigation />
+
+      {/* Main 3D View */}
+      <section className={`absolute inset-0 z-0 bg-blue-900/20 transition-opacity duration-1000 ${show2DMap ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+        <Globe 
+          projects={projects} 
+          activeProject={activeProject}
+          onProjectClick={handleProjectSelect}
+          onZoomIn={handleManualZoomIn}
+          is2DVisible={show2DMap}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+        
+        {/* Gradient Overlay for Text Readability */}
+        <div className="absolute inset-0 pointer-events-none bg-radial-gradient from-transparent via-transparent to-[var(--background-primary)] opacity-50" />
+
+        {/* Interactive Hint Overlay - Hidden on mobile (bottom sheet takes that space) */}
+        {!show2DMap && !activeProject && (
+          <div className="hidden md:block absolute bottom-8 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
+            <div className="glass-card px-6 py-3 text-center animate-pulse-slow">
+              <p className="text-sm text-[var(--text-secondary)]">
+                <span className="text-[var(--accent-primary)]">🖱️ Drag</span> to rotate • <span className="text-[var(--accent-primary)]">🔍 Scroll</span> to zoom • <span className="text-[var(--accent-primary)]">👆 Click</span> markers to view projects
+              </p>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* 2D Map View Transition */}
+      <section className={`absolute inset-0 z-[5] transition-opacity duration-1000 ${show2DMap ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+         {show2DMap && (
+             <MapView 
+                projects={projects}
+                activeProject={activeProject} 
+                initialCenter={mapCenter}
+                onClose={handleCloseProject}
+                onProjectClick={handleProjectSelect}
+             />
+         )}
+      </section>
+
+      {/* Project Overlay UI */}
+      <ProjectOverlay
+        projects={projects}
+        activeProject={activeProject}
+        onProjectSelect={handleProjectSelect}
+        onClose={handleCloseProject}
+      />
+    </main>
   );
 }
+
