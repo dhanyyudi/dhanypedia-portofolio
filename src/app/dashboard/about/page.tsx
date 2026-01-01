@@ -79,6 +79,7 @@ export default function EditAboutPage() {
             setTitle(data.title || '');
             setSummary(data.summary || '');
             setPhoto(data.photo_url || '');
+            setSocialLinks(data.social_links || []);
           }
         }
         
@@ -104,6 +105,7 @@ export default function EditAboutPage() {
           title,
           summary,
           photo_url: photo,
+          social_links: socialLinks,
         }),
       });
 
@@ -130,6 +132,10 @@ export default function EditAboutPage() {
 
   const addEducation = () => {
     setEducation([...education, { degree: '', institution: '', year: '' }]);
+  };
+
+  const addSocialLink = () => {
+    setSocialLinks([...socialLinks, { platform: 'twitter', url: '', icon: 'twitter' }]);
   };
 
   if (isLoading) {
@@ -444,6 +450,67 @@ export default function EditAboutPage() {
                 </div>
                 <button
                   onClick={() => setEducation(education.filter((_, i) => i !== index))}
+                  className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </motion.section>
+
+        {/* Social Links */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="glass-card p-6"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <Globe2 size={20} className="text-[var(--accent-primary)]" />
+              Social Links
+            </h2>
+            <button onClick={addSocialLink} className="btn-secondary py-1 px-3 text-sm">
+              <Plus size={14} /> Add Link
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {socialLinks.map((link, index) => (
+              <div key={index} className="p-4 bg-black/20 rounded-lg flex items-center gap-4">
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <select
+                    value={link.platform}
+                    onChange={(e) => {
+                      const updated = [...socialLinks];
+                      updated[index].platform = e.target.value;
+                      updated[index].icon = e.target.value; // Simple mapping
+                      setSocialLinks(updated);
+                    }}
+                    className="input-field"
+                  >
+                    <option value="github">GitHub</option>
+                    <option value="linkedin">LinkedIn</option>
+                    <option value="twitter">Twitter</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="facebook">Facebook</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <input
+                    type="text"
+                    value={link.url}
+                    onChange={(e) => {
+                      const updated = [...socialLinks];
+                      updated[index].url = e.target.value;
+                      setSocialLinks(updated);
+                    }}
+                    className="input-field md:col-span-2"
+                    placeholder="https://..."
+                  />
+                </div>
+                <button
+                  onClick={() => setSocialLinks(socialLinks.filter((_, i) => i !== index))}
                   className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg"
                 >
                   <Trash2 size={16} />

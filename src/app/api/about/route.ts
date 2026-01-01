@@ -1,22 +1,34 @@
 import { NextResponse } from 'next/server';
 import { supabase, createServerSupabaseClient } from '@/lib/supabase';
 
-// GET about data (public read) - gets the most recent about entry
+// GET about data (public read)
 export async function GET() {
   try {
-    const { data, error } = await supabase
+    const { data: aboutData, error: aboutError } = await supabase
       .from('about')
       .select('*')
       .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    if (error) {
-      console.error('GET about error:', error);
-      return NextResponse.json({ error: error.message }, { status: 400 });
+    if (aboutError) {
+      console.error('GET about error:', aboutError);
+      return NextResponse.json({ error: aboutError.message }, { status: 400 });
     }
 
-    return NextResponse.json(data || null);
+    // Fetch related tables
+    const { data: socialLinks } = await supabase
+      .from('social_links')
+      .select('*')
+      .order('display_order', { ascending: true });
+
+    // Combine data
+    const result = {
+      ...(aboutData || {}),
+      social_links: socialLinks || []
+    };
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Failed to fetch about:', error);
     return NextResponse.json({ error: 'Failed to fetch about' }, { status: 500 });
@@ -27,11 +39,9 @@ export async function GET() {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    
-    // Use service role client for admin operations (bypasses RLS)
     const adminClient = createServerSupabaseClient();
 
-    // Get the most recent about entry
+    // 1. Update About Profile
     const { data: existing } = await adminClient
       .from('about')
       .select('id')
@@ -39,9 +49,8 @@ export async function PUT(request: Request) {
       .limit(1)
       .maybeSingle();
 
-    let result;
+    let aboutId;
     if (existing) {
-      // Update existing
       const { data, error } = await adminClient
         .from('about')
         .update({
@@ -55,13 +64,9 @@ export async function PUT(request: Request) {
         .select()
         .single();
       
-      if (error) {
-        console.error('Update error:', error);
-        throw error;
-      }
-      result = data;
+      if (error) throw error;
+      aboutId = data.id;
     } else {
-      // Insert new
       const { data, error } = await adminClient
         .from('about')
         .insert({
@@ -73,14 +78,34 @@ export async function PUT(request: Request) {
         .select()
         .single();
       
-      if (error) {
-        console.error('Insert error:', error);
-        throw error;
-      }
-      result = data;
+      if (error) throw error;
+      aboutId = data.id;
     }
 
-    return NextResponse.json(result);
+    // 2. Update Social Links (Strategy: Delete All & Re-insert)
+    // This is simple and effective for small lists
+    if (body.social_links && Array.isArray(body.social_links)) {
+      // Delete existing
+      await adminClient.from('social_links').delete().neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+
+      // Insert new
+      if (body.social_links.length > 0) {
+        const linksToInsert = body.social_links.map((link: any, index: number) => ({
+          platform: link.platform,
+          url: link.url,
+          icon: link.icon,
+          display_order: index
+        }));
+
+        const { error: socialError } = await adminClient
+          .from('social_links')
+          .insert(linksToInsert);
+        
+        if (socialError) throw socialError;
+      }
+    }
+
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('About API error:', error);
     return NextResponse.json({ error: 'Failed to update about' }, { status: 500 });

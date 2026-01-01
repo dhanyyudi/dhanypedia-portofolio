@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { 
@@ -11,18 +11,38 @@ import {
   Github,
   Linkedin,
   Twitter,
+  Instagram,
+  Facebook,
   Globe,
   Navigation as NavIcon,
   Layers,
   Phone
 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
-import type { ContactFormData } from '@/types';
+import type { ContactFormData, SocialLink } from '@/types';
 
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   
+  useEffect(() => {
+    const fetchSocials = async () => {
+        try {
+            const res = await fetch('/api/about');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.social_links) {
+                    setSocialLinks(data.social_links);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to load social links');
+        }
+    };
+    fetchSocials();
+  }, []);
+
   const {
     register,
     handleSubmit,
@@ -148,24 +168,36 @@ export default function ContactPage() {
 
                     </div>
 
-                    <div className="mt-12 pt-8 border-t border-white/10">
+                     <div className="mt-12 pt-8 border-t border-white/10">
                          <h4 className="text-sm font-semibold text-[var(--text-secondary)] mb-4">Connect on Social</h4>
                          <div className="flex gap-4">
-                            {[
-                                { icon: <Github size={20} />, url: "https://github.com/dhanypedia", label: "Github" },
-                                { icon: <Linkedin size={20} />, url: "https://linkedin.com/in/dhanypedia", label: "LinkedIn" },
-                                { icon: <Twitter size={20} />, url: "https://twitter.com/dhanypedia", label: "Twitter" }
-                            ].map((social, index) => (
-                                <a
-                                  key={index}
-                                  href={social.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="p-3 bg-white/5 rounded-lg border border-white/10 hover:border-[var(--accent-primary)] hover:bg-[var(--accent-primary)] hover:text-white text-[var(--text-secondary)] transition-all transform hover:-translate-y-1"
-                                >
-                                    {social.icon}
-                                </a>
-                            ))}
+                            {socialLinks.length > 0 ? (
+                              socialLinks.map((social, index) => {
+                                const IconComponent = {
+                                  github: Github,
+                                  linkedin: Linkedin,
+                                  twitter: Twitter,
+                                  instagram: Instagram,
+                                  facebook: Facebook,
+                                  other: Globe
+                                }[social.icon || 'other'] || Globe;
+
+                                return (
+                                  <a
+                                    key={index}
+                                    href={social.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-3 bg-white/5 rounded-lg border border-white/10 hover:border-[var(--accent-primary)] hover:bg-[var(--accent-primary)] hover:text-white text-[var(--text-secondary)] transition-all transform hover:-translate-y-1"
+                                    title={social.platform}
+                                  >
+                                      <IconComponent size={20} />
+                                  </a>
+                                );
+                              })
+                            ) : (
+                              <p className="text-sm text-[var(--text-muted)]">No social links added yet.</p>
+                            )}
                          </div>
                     </div>
                 </div>
