@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MapPin, Calendar, Layers, ExternalLink, Share2, CheckCircle, X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Layers, ExternalLink, Share2, CheckCircle, X, ChevronLeft, ChevronRight, ZoomIn, Play } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import type { Project } from '@/types';
 
@@ -13,6 +13,18 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
   const [relatedProjects, setRelatedProjects] = useState<Project[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  // Helper to extract YouTube ID
+  const getYouTubeId = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  const getYouTubeThumbnail = (url: string) => {
+    const id = getYouTubeId(url);
+    return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : null;
+  };
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -139,20 +151,40 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
               <div>
                 <h2 className="text-2xl font-bold mb-6">Gallery</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {project.media.map((m, i) => (
-                    <div 
-                      key={i} 
-                      className="rounded-xl overflow-hidden h-64 border border-[var(--border-color)] group relative cursor-pointer"
-                      onClick={() => setLightboxIndex(i)}
-                    >
-                      <img src={m.url} alt={m.caption || project.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                        <span className="bg-black/50 text-white px-3 py-1.5 rounded-full text-sm flex items-center gap-2 backdrop-blur-sm">
-                          <ZoomIn size={14} /> View
-                        </span>
+                  {project.media.map((m, i) => {
+                    const isVideo = m.type === 'video' || m.url.includes('youtube') || m.url.includes('youtu.be');
+                    const thumbnailUrl = isVideo ? getYouTubeThumbnail(m.url) : m.url;
+                    
+                    return (
+                      <div 
+                        key={i} 
+                        className="rounded-xl overflow-hidden h-64 border border-[var(--border-color)] group relative cursor-pointer"
+                        onClick={() => setLightboxIndex(i)}
+                      >
+                        {/* Thumbnail / Image */}
+                        <img 
+                          src={thumbnailUrl || m.url} 
+                          alt={m.caption || project.title} 
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" 
+                        />
+                        
+                        {/* Overlay */}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                          <span className="bg-black/50 text-white px-3 py-1.5 rounded-full text-sm flex items-center gap-2 backdrop-blur-sm">
+                            {isVideo ? <Play size={14} /> : <ZoomIn size={14} />}
+                            {isVideo ? 'Play Video' : 'View Image'}
+                          </span>
+                        </div>
+
+                        {/* Video Indicator (Always visible) */}
+                        {isVideo && (
+                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 rounded-full flex items-center justify-center backdrop-blur-sm group-hover:opacity-0 transition-opacity">
+                            <Play size={20} className="text-white ml-1" />
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -260,7 +292,7 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
               <ChevronRight size={40} />
             </button>
 
-            {/* Image */}
+            {/* Image or Video */}
             <motion.div
               key={lightboxIndex}
               initial={{ scale: 0.9, opacity: 0 }}
@@ -269,11 +301,34 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
               className="relative max-w-5xl max-h-[80vh] w-full flex flex-col items-center"
               onClick={(e) => e.stopPropagation()}
             >
-              <img
-                src={project.media[lightboxIndex].url}
-                alt={project.media[lightboxIndex].caption || ''}
-                className="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl bg-black"
-              />
+              {(() => {
+                const currentMedia = project.media[lightboxIndex];
+                const isVideo = currentMedia.type === 'video' || currentMedia.url.includes('youtube') || currentMedia.url.includes('youtu.be');
+                const videoId = isVideo ? getYouTubeId(currentMedia.url) : null;
+
+                if (isVideo && videoId) {
+                  return (
+                    <div className="w-full aspect-video bg-black rounded-lg overflow-hidden shadow-2xl">
+                      <iframe
+                        src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
+                        title={currentMedia.caption || 'Project Video'}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  );
+                }
+
+                return (
+                  <img
+                    src={currentMedia.url}
+                    alt={currentMedia.caption || ''}
+                    className="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl bg-black"
+                  />
+                );
+              })()}
+
               {project.media[lightboxIndex].caption && (
                 <div className="mt-4 text-center">
                   <p className="inline-block bg-black/60 text-white px-4 py-2 rounded-full text-sm backdrop-blur-md">
