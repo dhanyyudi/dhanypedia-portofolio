@@ -12,24 +12,75 @@ import {
   Code2,
   Globe2,
   Cpu,
-  Layers
+  Layers,
+  Instagram,
+  Facebook,
+  Link as LinkIcon
 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { sampleAbout } from '@/data/sample';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 const iconMap: Record<string, React.ReactNode> = {
   github: <Github size={20} />,
   linkedin: <Linkedin size={20} />,
   twitter: <Twitter size={20} />,
   mail: <Mail size={20} />,
+  instagram: <Instagram size={20} />,
+  facebook: <Facebook size={20} />,
+  other: <LinkIcon size={20} />,
+};
+
+// Helper to get icon with fallback
+const getIcon = (link: { icon?: string; platform?: string }) => {
+  // Try icon first, then platform, then default
+  const key = link.icon || link.platform || '';
+  return iconMap[key] || <LinkIcon size={20} />;
 };
 
 export default function AboutPage() {
-  const about = sampleAbout;
+  const [about, setAbout] = useState(sampleAbout);
+  const [loading, setLoading] = useState(true);
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: containerRef });
   const y = useTransform(scrollYProgress, [0, 1], [0, -50]);
+
+  useEffect(() => {
+    const fetchAbout = async () => {
+      try {
+        const res = await fetch('/api/about');
+        if (res.ok) {
+          const data = await res.json();
+          // Merge with sample data structure to ensure no breaks if fields missing
+          if (data && data.name) {
+              setAbout({
+                  ...sampleAbout,
+                  ...data,
+                  // Ensure arrays are at least empty arrays if null
+                  skills: data.skills || [],
+                  experience: data.experience || [],
+                  education: data.education || [],
+                  social_links: data.social_links || []
+              });
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch about data", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAbout();
+  }, []);
+
+  const handleDownloadCV = () => {
+    if (about.cv_url) {
+      window.open(about.cv_url, '_blank');
+    } else {
+      // Fallback or Alert
+      alert("CV not uploaded yet");
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[var(--background-primary)] overflow-x-hidden selection:bg-[var(--accent-primary)] selection:text-white" ref={containerRef}>
@@ -60,9 +111,9 @@ export default function AboutPage() {
                  <div className="relative z-10 text-center">
                     <div className="relative w-40 h-40 mx-auto mb-6">
                       <div className="absolute inset-0 rounded-full border-2 border-[var(--accent-primary)] border-dashed animate-spin-slow" />
-                      {about.photo ? (
+                      {about.photo_url || about.photo ? (
                         <img
-                          src={about.photo}
+                          src={about.photo_url || about.photo}
                           alt={about.name}
                           className="w-full h-full object-cover rounded-full border-4 border-[var(--background-card)] shadow-2xl"
                         />
@@ -90,7 +141,7 @@ export default function AboutPage() {
                           rel="noopener noreferrer"
                           className="p-3 bg-white/5 rounded-xl text-[var(--text-secondary)] hover:text-white hover:bg-[var(--accent-primary)]/20 hover:scale-110 transition-all border border-transparent hover:border-[var(--accent-primary)]/50"
                         >
-                          {iconMap[link.icon || ''] || <Code2 size={20} />}
+                          {getIcon(link)}
                         </a>
                       ))}
                     </div>
@@ -110,9 +161,21 @@ export default function AboutPage() {
                         </div>
                     </div>
                     
-                    <button className="w-full mt-6 btn-glow py-3 text-sm tracking-wider uppercase font-semibold">
-                        Download CV
+                    <button 
+                        onClick={handleDownloadCV}
+                        className="w-full mt-6 btn-glow py-3 text-sm tracking-wider uppercase font-semibold"
+                    >
+                        {about.cv_url ? "Download CV" : "CV Not Available"}
                     </button>
+
+                    <a 
+                        href="/print/portfolio"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full mt-3 btn-secondary py-3 text-sm tracking-wider uppercase font-semibold text-center block"
+                    >
+                        📄 View Portfolio PDF
+                    </a>
                  </div>
               </motion.div>
             </div>

@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
-:root {
+/* ========== DARK THEME (Default) ========== */
+:root,
+[data-theme="dark"] {
   /* Modern Blue GIS Theme Colors */
   --background-primary: #020617; /* Deep Navy */
   --background-secondary: #0f172a; /* Slate 900 */
@@ -28,6 +30,34 @@
   --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
+/* ========== LIGHT THEME ========== */
+[data-theme="light"] {
+  --background-primary: #f8fafc; /* Slate 50 */
+  --background-secondary: #f1f5f9; /* Slate 100 */
+  --background-tertiary: #e2e8f0; /* Slate 200 */
+  --background-card: rgba(255, 255, 255, 0.9); /* White translucent */
+  
+  --accent-primary: #0284c7; /* Sky 600 - Darker for contrast */
+  --accent-secondary: #0369a1; /* Sky 700 */
+  --accent-glow: #38bdf8; /* Sky 400 */
+  --accent-warning: #e11d48; /* Rose 600 */
+  
+  --text-primary: #0f172a; /* Slate 900 */
+  --text-secondary: #475569; /* Slate 600 */
+  --text-muted: #64748b; /* Slate 500 */
+  
+  --border-color: #cbd5e1; /* Slate 300 */
+  --border-glow: rgba(2, 132, 199, 0.3);
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+  --gradient-glow: linear-gradient(135deg, rgba(2, 132, 199, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%);
+  
+  /* Shadows */
+  --shadow-glow: 0 0 20px rgba(2, 132, 199, 0.2);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -43,6 +73,7 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Typography */

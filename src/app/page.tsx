@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import Navigation from "@/components/Navigation";
 import ProjectOverlay from "@/components/ProjectOverlay";
+import ChatWidget from "@/components/ChatWidget";
 import type { Project } from "@/types";
 import './leaflet-custom.css';
 
@@ -127,6 +128,9 @@ export default function Home() {
         onProjectSelect={handleProjectSelect}
         onClose={handleCloseProject}
       />
+
+      {/* AI Chat Widget */}
+      <ChatWidget />
     </main>
   );
 }

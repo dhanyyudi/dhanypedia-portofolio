@@ -4,17 +4,21 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Globe2, Home, User, Mail } from 'lucide-react';
-
-const navLinks = [
-  { href: '/', label: 'Home', icon: Home },
-  { href: '/about', label: 'About', icon: User },
-  { href: '/contact', label: 'Contact', icon: Mail },
-];
+import { Menu, X, Globe2, Home, User, Mail, Sun, Moon, Languages } from 'lucide-react';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Navigation() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
+
+  const navLinks = [
+    { href: '/', label: t('nav.home'), icon: Home },
+    { href: '/about', label: t('nav.about'), icon: User },
+    { href: '/contact', label: t('nav.contact'), icon: Mail },
+  ];
 
   // Close menu on route change
   useEffect(() => {
@@ -52,25 +56,69 @@ export default function Navigation() {
                   {link.label}
                 </Link>
               ))}
+
+              {/* Divider */}
+              <div className="w-px h-6 bg-[var(--border-color)] mx-2" />
+
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-lg hover:bg-white/10 transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                aria-label="Toggle theme"
+                title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              >
+                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+
+              {/* Language Toggle */}
+              <button
+                onClick={() => setLanguage(language === 'en' ? 'id' : 'en')}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-white/10 transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm font-medium"
+                aria-label="Toggle language"
+              >
+                <Languages size={16} />
+                <span>{language.toUpperCase()}</span>
+              </button>
             </div>
 
-            {/* Mobile Menu Toggle */}
-            <button
-              className="md:hidden p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              aria-label="Toggle menu"
-            >
-              {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
+            {/* Mobile Controls */}
+            <div className="flex md:hidden items-center gap-1">
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                aria-label="Toggle theme"
+              >
+                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+
+              {/* Language Toggle */}
+              <button
+                onClick={() => setLanguage(language === 'en' ? 'id' : 'en')}
+                className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors text-xs font-bold"
+                aria-label="Toggle language"
+              >
+                {language.toUpperCase()}
+              </button>
+
+              {/* Menu Toggle */}
+              <button
+                className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-label="Toggle menu"
+              >
+                {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+              </button>
+            </div>
           </div>
         </div>
       </nav>
 
-      {/* Mobile Dropdown Menu - Compact, slides from right */}
+      {/* Mobile Dropdown Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
-            {/* Backdrop - tap to close */}
+            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -80,7 +128,7 @@ export default function Navigation() {
               onClick={() => setIsMobileMenuOpen(false)}
             />
             
-            {/* Compact Menu Panel - Right side, auto height */}
+            {/* Menu Panel */}
             <motion.div
               initial={{ opacity: 0, x: 20, scale: 0.95 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}

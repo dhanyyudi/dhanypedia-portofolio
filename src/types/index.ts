@@ -57,6 +57,8 @@ export interface About {
   name: string;
   title: string;
   photo?: string;
+  photo_url?: string; // Supabase variant
+  cv_url?: string;
   summary: string;
   skills: Skill[];
   experience: Experience[];

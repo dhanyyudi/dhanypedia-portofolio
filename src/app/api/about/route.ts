@@ -41,7 +41,7 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const adminClient = createServerSupabaseClient();
 
-    // 1. Update About Profile
+// 1. Update About Profile
     const { data: existing } = await adminClient
       .from('about')
       .select('id')
@@ -58,6 +58,10 @@ export async function PUT(request: Request) {
           title: body.title,
           summary: body.summary,
           photo_url: body.photo_url,
+          cv_url: body.cv_url,
+          skills: body.skills,
+          experience: body.experience,
+          education: body.education,
           updated_at: new Date().toISOString(),
         })
         .eq('id', existing.id)
@@ -74,6 +78,10 @@ export async function PUT(request: Request) {
           title: body.title,
           summary: body.summary,
           photo_url: body.photo_url,
+          cv_url: body.cv_url,
+          skills: body.skills || [],
+          experience: body.experience || [],
+          education: body.education || [],
         })
         .select()
         .single();
