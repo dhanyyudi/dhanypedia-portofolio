@@ -33,8 +33,22 @@ const isMobileDevice = (): boolean => {
   return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 };
 
-const getProjectIcon = (title: string) => {
-  const t = title.toLowerCase();
+const getProjectIcon = (project: Project) => {
+  // Use explicit category if available
+  if (project.category) {
+    switch (project.category) {
+      case 'urban': return <Building2 size={16} />;
+      case 'environment': return <Trees size={16} />;
+      case 'water': return <Waves size={16} />;
+      case 'mining': return <Pickaxe size={16} />;
+      case 'transport': return <Navigation size={16} />;
+      case 'energy': return <Zap size={16} />;
+      case 'other': return <Globe2 size={16} />;
+    }
+  }
+
+  // Fallback to title matching
+  const t = project.title.toLowerCase();
   if (t.includes('urban') || t.includes('city') || t.includes('infrastructure')) return <Building2 size={16} />;
   if (t.includes('forest') || t.includes('agriculture') || t.includes('land')) return <Trees size={16} />;
   if (t.includes('flood') || t.includes('water') || t.includes('coastal')) return <Waves size={16} />;
@@ -92,7 +106,7 @@ const GlobeComponent = ({ projects, activeProject, onProjectClick, onZoomIn, is2
         .htmlElement((d: any) => {
           const project = d as Project;
           const isActive = activeProject?.id === project.id;
-          const icon = getProjectIcon(project.title);
+          const icon = getProjectIcon(project);
           const color = isActive ? '#38bdf8' : '#ffffff';
           
           const el = document.createElement('div');

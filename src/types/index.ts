@@ -21,6 +21,7 @@ export interface Project {
   tech_stack: string[];
   impacts: string[];
   external_link?: string;
+  category?: string;
   is_visible: boolean;
   created_at: string;
   updated_at: string;
@@ -84,6 +85,7 @@ export interface ProjectFormData {
   tech_stack: string[];
   impacts: string[];
   external_link?: string;
+  category?: string;
   is_visible: boolean;
 }
 

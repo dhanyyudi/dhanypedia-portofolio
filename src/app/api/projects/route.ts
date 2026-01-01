@@ -53,6 +53,7 @@ export async function GET() {
           caption: m.caption,
         })),
       external_link: p.external_link,
+      category: p.category,
       is_visible: p.is_visible,
       impacts: [],
       created_at: p.created_at,
@@ -87,6 +88,7 @@ export async function POST(request: Request) {
         location_lng: body.location?.longitude || body.location_lng,
         tech_stack: body.tech_stack || [],
         external_link: body.external_link,
+        category: body.category,
         is_visible: body.is_visible ?? true,
       })
       .select()

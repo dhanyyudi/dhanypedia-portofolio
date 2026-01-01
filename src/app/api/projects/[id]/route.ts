@@ -43,6 +43,7 @@ export async function GET(
         caption: m.caption,
       })),
       external_link: project.external_link,
+      category: project.category,
       is_visible: project.is_visible,
       impacts: project.impacts || [],
       created_at: project.created_at,
@@ -83,6 +84,7 @@ export async function PATCH(
     if (projectData.location_lng !== undefined) updateData.location_lng = projectData.location_lng;
     if (projectData.tech_stack !== undefined) updateData.tech_stack = projectData.tech_stack;
     if (projectData.external_link !== undefined) updateData.external_link = projectData.external_link;
+    if (projectData.category !== undefined) updateData.category = projectData.category;
     if (projectData.is_visible !== undefined) updateData.is_visible = projectData.is_visible;
     if (projectData.impacts !== undefined) updateData.impacts = projectData.impacts;
 

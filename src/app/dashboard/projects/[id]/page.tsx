@@ -111,6 +111,7 @@ export default function ProjectFormPage() {
               tech_stack: project.tech_stack,
               impacts: project.impacts || [],
               external_link: project.external_link || '',
+              category: project.category || '',
               is_visible: project.is_visible
             });
           }
@@ -210,6 +211,7 @@ export default function ProjectFormPage() {
         location_lng: data.longitude,
         tech_stack: data.tech_stack.filter(t => t.trim() !== ''),
         external_link: data.external_link || null,
+        category: data.category || null,
         is_visible: data.is_visible,
         media: data.media.filter(m => m.url.trim() !== '').map(m => ({
           type: m.type,
@@ -292,6 +294,27 @@ export default function ProjectFormPage() {
               {errors.title && (
                 <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
               )}
+            </div>
+
+            {/* Category */}
+            <div>
+              <label className="label">Project Sector / Category</label>
+              <select
+                className="input-field"
+                {...register('category')}
+              >
+                <option value="">Select a category...</option>
+                <option value="urban">Urban & Infrastructure (Building)</option>
+                <option value="environment">Environment & Forestry (Tree)</option>
+                <option value="water">Water & Coastal (Waves)</option>
+                <option value="mining">Mining & Reclamation (Pickaxe)</option>
+                <option value="transport">Transportation (Navigation)</option>
+                <option value="energy">Energy & Utilities (Zap)</option>
+                <option value="other">Other (Globe)</option>
+              </select>
+              <p className="text-xs text-[var(--text-muted)] mt-1">
+                This determines the icon shown on the 3D Globe.
+              </p>
             </div>
 
             {/* Description */}
