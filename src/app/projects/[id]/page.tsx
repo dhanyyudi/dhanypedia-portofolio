@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Calendar, Layers, ExternalLink, Share2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Layers, ExternalLink, Share2, CheckCircle } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import type { Project } from '@/types';
 
@@ -113,6 +113,24 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
                 {project.description}
               </p>
             </div>
+
+            {/* Key Impacts */}
+            {project.impacts && project.impacts.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                  <CheckCircle className="text-green-500" />
+                  Key Impacts
+                </h2>
+                <ul className="space-y-3">
+                  {project.impacts.map((impact, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <span className="w-2 h-2 mt-2 rounded-full bg-[var(--accent-primary)] shrink-0" />
+                      <span className="text-[var(--text-secondary)]">{impact}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* Gallery */}
             {project.media.length > 0 && (
