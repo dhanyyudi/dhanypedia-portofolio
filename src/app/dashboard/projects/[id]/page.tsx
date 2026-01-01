@@ -305,13 +305,16 @@ export default function ProjectFormPage() {
                 {...register('category')}
               >
                 <option value="">Select a category...</option>
-                <option value="urban">Urban & Infrastructure (Building)</option>
-                <option value="environment">Environment & Forestry (Tree)</option>
-                <option value="water">Water & Coastal (Waves)</option>
-                <option value="mining">Mining & Reclamation (Pickaxe)</option>
-                <option value="transport">Transportation (Navigation)</option>
-                <option value="energy">Energy & Utilities (Zap)</option>
-                <option value="other">Other (Globe)</option>
+                <option value="enterprise">🌍 Enterprise WebGIS (Bappenas, BIG, Hutama Karya)</option>
+                <option value="intelligence">📊 Spatial Data Intelligence (Dashboards, Analytics)</option>
+                <option value="engineering">🛠️ Geospatial Software Engineering (OSRM, Tools, Dev)</option>
+                <option value="frontier">🚀 Frontier Tech & Design (3D, Mobile, UI/UX)</option>
+                
+                <option disabled>--- Legacy ---</option>
+                <option value="urban">Urban</option>
+                <option value="environment">Environment</option>
+                <option value="water">Water</option>
+                <option value="transport">Transport</option>
               </select>
               <p className="text-xs text-[var(--text-muted)] mt-1">
                 This determines the icon shown on the 3D Globe.

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import { Building2, Trees, Zap, Navigation, Waves, Pickaxe, Globe2, MapPin, AlertTriangle } from 'lucide-react';
+import { Building2, Trees, Zap, Navigation, Waves, Pickaxe, Globe2, MapPin, AlertTriangle, Terminal, PieChart, Box, Layers } from 'lucide-react';
 import { renderToString } from 'react-dom/server';
 import type { Project } from '@/types';
 
@@ -33,28 +33,52 @@ const isMobileDevice = (): boolean => {
   return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 };
 
-const getProjectIcon = (project: Project) => {
+const getProjectStyle = (project: Project): { icon: React.ReactNode, color: string } => {
   // Use explicit category if available
   if (project.category) {
     switch (project.category) {
-      case 'urban': return <Building2 size={16} />;
-      case 'environment': return <Trees size={16} />;
-      case 'water': return <Waves size={16} />;
-      case 'mining': return <Pickaxe size={16} />;
-      case 'transport': return <Navigation size={16} />;
-      case 'energy': return <Zap size={16} />;
-      case 'other': return <Globe2 size={16} />;
+      // 1. Enterprise WebGIS Systems (Blue)
+      case 'enterprise': 
+        return { icon: <Globe2 size={16} />, color: '#3b82f6' }; // Blue-500
+      
+      // 2. Spatial Data Intelligence (Orange/Yellow)
+      case 'intelligence': 
+        return { icon: <PieChart size={16} />, color: '#f59e0b' }; // Amber-500
+      
+      // 3. Geospatial Software Engineering (Green)
+      case 'engineering': 
+        return { icon: <Terminal size={16} />, color: '#22c55e' }; // Green-500
+      
+      // 4. Frontier Tech & Design (Purple)
+      case 'frontier': 
+        return { icon: <Box size={16} />, color: '#a855f7' }; // Purple-500
+        
+      // Legacy / Fallbacks
+      case 'urban': return { icon: <Building2 size={16} />, color: '#3b82f6' };
+      case 'environment': return { icon: <Trees size={16} />, color: '#22c55e' };
+      case 'water': return { icon: <Waves size={16} />, color: '#0ea5e9' };
+      case 'mining': return { icon: <Pickaxe size={16} />, color: '#f59e0b' };
+      case 'transport': return { icon: <Navigation size={16} />, color: '#ef4444' };
+      case 'energy': return { icon: <Zap size={16} />, color: '#eab308' };
     }
   }
 
   // Fallback to title matching
   const t = project.title.toLowerCase();
-  if (t.includes('urban') || t.includes('city') || t.includes('infrastructure')) return <Building2 size={16} />;
-  if (t.includes('forest') || t.includes('agriculture') || t.includes('land')) return <Trees size={16} />;
-  if (t.includes('flood') || t.includes('water') || t.includes('coastal')) return <Waves size={16} />;
-  if (t.includes('mining') || t.includes('reclamation')) return <Pickaxe size={16} />;
-  if (t.includes('transport')) return <Navigation size={16} />;
-  return <Zap size={16} />;
+  
+  if (t.includes('bappenas') || t.includes('sitaswil') || t.includes('jtts webgis')) 
+    return { icon: <Globe2 size={16} />, color: '#3b82f6' };
+    
+  if (t.includes('dashboard') || t.includes('analytics') || t.includes('geotechnical')) 
+    return { icon: <PieChart size={16} />, color: '#f59e0b' };
+    
+  if (t.includes('osrm') || t.includes('geofence') || t.includes('waypoint')) 
+    return { icon: <Terminal size={16} />, color: '#22c55e' };
+    
+  if (t.includes('3d') || t.includes('merapi') || t.includes('redesign')) 
+    return { icon: <Box size={16} />, color: '#a855f7' };
+
+  return { icon: <MapPin size={16} />, color: '#ffffff' };
 };
 
 const GlobeComponent = ({ projects, activeProject, onProjectClick, onZoomIn, is2DVisible }: GlobeProps) => {
@@ -106,8 +130,12 @@ const GlobeComponent = ({ projects, activeProject, onProjectClick, onZoomIn, is2
         .htmlElement((d: any) => {
           const project = d as Project;
           const isActive = activeProject?.id === project.id;
-          const icon = getProjectIcon(project);
-          const color = isActive ? '#38bdf8' : '#ffffff';
+          const style = getProjectStyle(project);
+          
+          // Active state always uses bright cyan, inactive uses category color
+          const borderColor = isActive ? '#38bdf8' : style.color;
+          const glowColor = isActive ? '#38bdf8' : style.color;
+          const textColor = isActive ? '#38bdf8' : style.color;
           
           const el = document.createElement('div');
           el.style.display = 'flex';
@@ -126,20 +154,20 @@ const GlobeComponent = ({ projects, activeProject, onProjectClick, onZoomIn, is2
               width: ${size};
               height: ${size};
               background: rgba(15, 23, 42, 0.9);
-              border: 2px solid ${color};
+              border: 2px solid ${borderColor};
               border-radius: 50%;
-              color: ${color};
-              box-shadow: 0 0 15px rgba(56, 189, 248, ${isActive ? '0.5' : '0.2'});
+              color: ${textColor};
+              box-shadow: 0 0 15px ${glowColor}66;
               transition: all 0.3s ease;
             ">
-              ${renderToString(icon)}
+              ${renderToString(style.icon)}
             </div>
             <div style="
-              max-width: 120px;
+              max-width: 140px;
               text-align: center;
               font-size: 10px;
               font-weight: 600;
-              color: ${color};
+              color: ${textColor};
               padding: 2px 8px;
               margin-top: 4px;
               background: rgba(15, 23, 42, 0.85);
@@ -162,16 +190,19 @@ const GlobeComponent = ({ projects, activeProject, onProjectClick, onZoomIn, is2
             const label = el.querySelector('div:last-child') as HTMLElement;
             if (badge) badge.style.borderColor = '#38bdf8';
             if (badge) badge.style.transform = 'scale(1.1)';
+            if (badge) badge.style.boxShadow = `0 0 20px #38bdf8`;
             if (label) label.style.borderColor = '#38bdf8';
-            if (label) label.style.color = '#fff';
+            if (label) label.style.color = '#38bdf8';
           };
           el.onmouseleave = () => {
             document.body.style.cursor = 'default';
             const badge = el.querySelector('div:first-child') as HTMLElement;
             const label = el.querySelector('div:last-child') as HTMLElement;
-            if (!isActive && badge) badge.style.borderColor = '#ffffff';
+            if (!isActive && badge) badge.style.borderColor = borderColor;
             if (badge) badge.style.transform = 'scale(1)';
+            if (badge) badge.style.boxShadow = `0 0 15px ${glowColor}66`;
             if (!isActive && label) label.style.borderColor = 'rgba(255,255,255,0.1)';
+            if (!isActive && label) label.style.color = textColor;
           };
           
           return el;
