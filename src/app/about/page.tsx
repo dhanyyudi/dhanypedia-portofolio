@@ -39,7 +39,7 @@ const getIcon = (link: { icon?: string; platform?: string }) => {
 };
 
 export default function AboutPage() {
-  const [about, setAbout] = useState(sampleAbout);
+  const [about, setAbout] = useState<typeof sampleAbout | null>(null);
   const [loading, setLoading] = useState(true);
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: containerRef });
@@ -51,21 +51,25 @@ export default function AboutPage() {
         const res = await fetch('/api/about');
         if (res.ok) {
           const data = await res.json();
-          // Merge with sample data structure to ensure no breaks if fields missing
           if (data && data.name) {
               setAbout({
                   ...sampleAbout,
                   ...data,
-                  // Ensure arrays are at least empty arrays if null
-                  skills: data.skills || [],
-                  experience: data.experience || [],
-                  education: data.education || [],
-                  social_links: data.social_links || []
+                  skills: data.skills || sampleAbout.skills,
+                  experience: data.experience || sampleAbout.experience,
+                  education: data.education || sampleAbout.education,
+                  social_links: data.social_links || sampleAbout.social_links
               });
+          } else {
+            // Use sample data if API returns empty
+            setAbout(sampleAbout);
           }
+        } else {
+          setAbout(sampleAbout);
         }
       } catch (e) {
         console.error("Failed to fetch about data", e);
+        setAbout(sampleAbout);
       } finally {
         setLoading(false);
       }
@@ -74,13 +78,46 @@ export default function AboutPage() {
   }, []);
 
   const handleDownloadCV = () => {
-    if (about.cv_url) {
+    if (about?.cv_url) {
       window.open(about.cv_url, '_blank');
     } else {
-      // Fallback or Alert
       alert("CV not uploaded yet");
     }
   };
+
+  // Show loading skeleton while fetching data
+  if (loading || !about) {
+    return (
+      <main className="min-h-screen bg-[var(--background-primary)]">
+        <Navigation />
+        <div className="max-w-7xl mx-auto px-6 pt-32 pb-20">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            {/* Profile Skeleton */}
+            <div className="lg:col-span-4">
+              <div className="glass-card p-8 animate-pulse">
+                <div className="w-40 h-40 mx-auto mb-6 bg-white/10 rounded-full" />
+                <div className="h-8 bg-white/10 rounded mb-4 mx-auto w-3/4" />
+                <div className="h-4 bg-white/10 rounded mb-6 mx-auto w-1/2" />
+                <div className="flex justify-center gap-3 mb-8">
+                  <div className="w-12 h-12 bg-white/10 rounded-xl" />
+                  <div className="w-12 h-12 bg-white/10 rounded-xl" />
+                </div>
+              </div>
+            </div>
+            {/* Content Skeleton */}
+            <div className="lg:col-span-8 space-y-8">
+              <div className="glass-card p-8 animate-pulse">
+                <div className="h-6 bg-white/10 rounded w-1/4 mb-4" />
+                <div className="h-4 bg-white/10 rounded w-full mb-2" />
+                <div className="h-4 bg-white/10 rounded w-5/6 mb-2" />
+                <div className="h-4 bg-white/10 rounded w-4/6" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[var(--background-primary)] overflow-x-hidden selection:bg-[var(--accent-primary)] selection:text-white" ref={containerRef}>
