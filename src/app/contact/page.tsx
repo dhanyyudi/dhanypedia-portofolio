@@ -32,13 +32,38 @@ export default function ContactPage() {
 
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    console.log('Form submitted:', data);
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    reset();
-    setTimeout(() => setIsSubmitted(false), 5000);
+    
+    try {
+      const formId = process.env.NEXT_PUBLIC_FORMSPREE_ID;
+      
+      if (!formId) {
+        throw new Error('Form ID not configured');
+      }
+
+      const response = await fetch(`https://formspree.io/f/${formId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (response.ok) {
+        setIsSubmitted(true);
+        reset();
+        setTimeout(() => setIsSubmitted(false), 5000);
+      } else {
+        const errorData = await response.json();
+        console.error('Form error:', errorData);
+        alert('Failed to send message. Please try again later.');
+      }
+    } catch (error) {
+      console.error('Submission error:', error);
+      // Fallback for demo if ID is missing (optional, or just alert)
+      alert(error instanceof Error ? error.message : 'An error occurred');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
