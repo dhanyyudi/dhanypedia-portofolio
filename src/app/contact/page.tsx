@@ -146,8 +146,8 @@ export default function ContactPage() {
                             </div>
                             <div>
                                 <h4 className="text-sm font-semibold text-[var(--accent-secondary)] uppercase tracking-wider mb-1">Email Address</h4>
-                                <a href="mailto:hello@dhanypedia.com" className="text-xl text-white hover:text-[var(--accent-primary)] transition-colors font-medium">
-                                    hello@dhanypedia.com
+                                <a href="mailto:dhanypedia@gmail.com" className="text-xl text-white hover:text-[var(--accent-primary)] transition-colors font-medium">
+                                    dhanypedia@gmail.com
                                 </a>
                             </div>
                         </div>

@@ -265,10 +265,8 @@ I combine traditional GIS methodologies with modern technologies like machine le
     }
   ],
   social_links: [
-    { platform: 'GitHub', url: 'https://github.com/dhanypedia', icon: 'github' },
-    { platform: 'LinkedIn', url: 'https://linkedin.com/in/dhanypedia', icon: 'linkedin' },
-    { platform: 'Twitter', url: 'https://twitter.com/dhanypedia', icon: 'twitter' },
-    { platform: 'Email', url: 'mailto:hello@dhanypedia.com', icon: 'mail' }
+    { platform: 'GitHub', url: 'https://github.com/dhanyyudi', icon: 'github' },
+    { platform: 'LinkedIn', url: 'https://linkedin.com/in/dhanyyudi', icon: 'linkedin' }
   ],
   updated_at: '2024-06-20T00:00:00Z'
 };
