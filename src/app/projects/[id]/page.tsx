@@ -2,7 +2,8 @@
 
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Calendar, Layers, ExternalLink, Share2, CheckCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, MapPin, Calendar, Layers, ExternalLink, Share2, CheckCircle, X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import type { Project } from '@/types';
 
@@ -11,6 +12,7 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
   const [project, setProject] = useState<Project | null>(null);
   const [relatedProjects, setRelatedProjects] = useState<Project[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -60,7 +62,7 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
   }
 
   return (
-    <main className="min-h-screen bg-[var(--background-primary)]">
+    <main className="min-h-screen bg-[var(--background-primary)] pt-28">
       <Navigation />
       
       {/* Hero Header */}
@@ -74,7 +76,7 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[var(--background-primary)] via-[var(--background-primary)]/50 to-transparent" />
         
-        <div className="absolute top-24 left-6 md:left-12 z-20">
+        <div className="absolute top-6 left-6 md:left-12 z-20">
           <Link href="/" className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors mb-6 glass-card px-4 py-2">
             <ArrowLeft size={16} /> Back to Globe
           </Link>
@@ -138,8 +140,17 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
                 <h2 className="text-2xl font-bold mb-6">Gallery</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {project.media.map((m, i) => (
-                    <div key={i} className="rounded-xl overflow-hidden h-64 border border-[var(--border-color)]">
+                    <div 
+                      key={i} 
+                      className="rounded-xl overflow-hidden h-64 border border-[var(--border-color)] group relative cursor-pointer"
+                      onClick={() => setLightboxIndex(i)}
+                    >
                       <img src={m.url} alt={m.caption || project.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                        <span className="bg-black/50 text-white px-3 py-1.5 rounded-full text-sm flex items-center gap-2 backdrop-blur-sm">
+                          <ZoomIn size={14} /> View
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -204,6 +215,76 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
       <footer className="border-t border-[var(--border-color)] py-8 mt-12 text-center text-[var(--text-muted)]">
         <p>© {new Date().getFullYear()} Dhanypedia. Built with passion for GIS.</p>
       </footer>
+
+      {/* Lightbox */}
+      <AnimatePresence>
+        {lightboxIndex !== null && project && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm"
+            onClick={() => setLightboxIndex(null)}
+          >
+            {/* Close Button */}
+            <button
+              className="absolute top-6 right-6 text-white/70 hover:text-white transition-colors p-2 bg-black/20 rounded-full hover:bg-white/10"
+              onClick={() => setLightboxIndex(null)}
+            >
+              <X size={32} />
+            </button>
+
+            {/* Prev Button */}
+            <button
+              className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors p-3 bg-black/20 rounded-full hover:bg-white/10"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxIndex((prev) => 
+                  prev !== null ? (prev - 1 + project.media.length) % project.media.length : null
+                );
+              }}
+            >
+              <ChevronLeft size={40} />
+            </button>
+
+            {/* Next Button */}
+            <button
+              className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors p-3 bg-black/20 rounded-full hover:bg-white/10"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxIndex((prev) => 
+                  prev !== null ? (prev + 1) % project.media.length : null
+                );
+              }}
+            >
+              <ChevronRight size={40} />
+            </button>
+
+            {/* Image */}
+            <motion.div
+              key={lightboxIndex}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative max-w-5xl max-h-[80vh] w-full flex flex-col items-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img
+                src={project.media[lightboxIndex].url}
+                alt={project.media[lightboxIndex].caption || ''}
+                className="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl bg-black"
+              />
+              {project.media[lightboxIndex].caption && (
+                <div className="mt-4 text-center">
+                  <p className="inline-block bg-black/60 text-white px-4 py-2 rounded-full text-sm backdrop-blur-md">
+                    {project.media[lightboxIndex].caption}
+                  </p>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
