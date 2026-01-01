@@ -41,9 +41,16 @@ const getIcon = (link: { icon?: string; platform?: string }) => {
 export default function AboutPage() {
   const [about, setAbout] = useState<typeof sampleAbout | null>(null);
   const [loading, setLoading] = useState(true);
-  const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({ target: containerRef });
+  const [mounted, setMounted] = useState(false);
+  const containerRef = useRef<HTMLElement>(null);
+  
+  // Only use scroll effects after mount to prevent hydration mismatch
+  const { scrollYProgress } = useScroll();
   const y = useTransform(scrollYProgress, [0, 1], [0, -50]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const fetchAbout = async () => {
