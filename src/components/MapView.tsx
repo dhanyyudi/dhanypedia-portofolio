@@ -5,7 +5,7 @@ import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { renderToString } from 'react-dom/server';
 import { DivIcon } from 'leaflet';
-import { Building2, Trees, Zap, Navigation, Pickaxe, Waves, Globe2 } from 'lucide-react';
+import { Building2, Trees, Zap, Navigation, Pickaxe, Waves, Globe2, Terminal, PieChart, Box, Layers, MapPin } from 'lucide-react';
 import type { Project } from '@/types';
 
 // Props Interface
@@ -28,20 +28,64 @@ function MapUpdater({ center }: { center: [number, number] }) {
   return null;
 }
 
-// Icon Helper (Same as Globe.tsx)
-const getProjectIcon = (title: string, size: number = 16) => {
-  const t = title.toLowerCase();
-  if (t.includes('urban') || t.includes('city') || t.includes('infrastructure')) return <Building2 size={size} />;
-  if (t.includes('forest') || t.includes('agriculture') || t.includes('land')) return <Trees size={size} />;
-  if (t.includes('flood') || t.includes('water') || t.includes('coastal')) return <Waves size={size} />;
-  if (t.includes('mining') || t.includes('reclamation')) return <Pickaxe size={size} />;
-  if (t.includes('transport')) return <Navigation size={size} />;
-  return <Zap size={size} />;
+// Icon Helper (Synced with Globe.tsx)
+const getProjectStyle = (project: Project, size: number = 16): { icon: React.ReactNode, color: string } => {
+  // Use explicit category if available
+  if (project.category) {
+    switch (project.category) {
+      // 1. Enterprise WebGIS Systems (Blue)
+      case 'enterprise': 
+        return { icon: <Globe2 size={size} />, color: '#3b82f6' }; // Blue-500
+      
+      // 2. Spatial Data Intelligence (Orange/Yellow)
+      case 'intelligence': 
+        return { icon: <PieChart size={size} />, color: '#f59e0b' }; // Amber-500
+      
+      // 3. Geospatial Software Engineering (Green)
+      case 'engineering': 
+        return { icon: <Terminal size={size} />, color: '#22c55e' }; // Green-500
+      
+      // 4. Frontier Tech & Design (Purple)
+      case 'frontier': 
+        return { icon: <Box size={size} />, color: '#a855f7' }; // Purple-500
+        
+      // Legacy / Fallbacks
+      case 'urban': return { icon: <Building2 size={size} />, color: '#3b82f6' };
+      case 'environment': return { icon: <Trees size={size} />, color: '#22c55e' };
+      case 'water': return { icon: <Waves size={size} />, color: '#0ea5e9' };
+      case 'mining': return { icon: <Pickaxe size={size} />, color: '#f59e0b' };
+      case 'transport': return { icon: <Navigation size={size} />, color: '#ef4444' };
+      case 'energy': return { icon: <Zap size={size} />, color: '#eab308' };
+    }
+  }
+
+  // Fallback to title matching
+  const t = project.title.toLowerCase();
+  
+  if (t.includes('bappenas') || t.includes('sitaswil') || t.includes('jtts webgis')) 
+    return { icon: <Globe2 size={size} />, color: '#3b82f6' };
+    
+  if (t.includes('dashboard') || t.includes('analytics') || t.includes('geotechnical')) 
+    return { icon: <PieChart size={size} />, color: '#f59e0b' };
+    
+  if (t.includes('osrm') || t.includes('geofence') || t.includes('waypoint')) 
+    return { icon: <Terminal size={size} />, color: '#22c55e' };
+    
+  if (t.includes('3d') || t.includes('merapi') || t.includes('redesign')) 
+    return { icon: <Box size={size} />, color: '#a855f7' };
+
+  return { icon: <MapPin size={size} />, color: '#ffffff' };
 };
 
 const createCustomMarker = (project: Project, isActive: boolean) => {
-    const iconHtml = renderToString(getProjectIcon(project.title, isActive ? 24 : 18));
-    const color = isActive ? '#38bdf8' : '#ffffff';
+    const style = getProjectStyle(project, isActive ? 24 : 18);
+    const iconHtml = renderToString(style.icon);
+    
+    // Active state always uses bright cyan, inactive uses category color
+    const borderColor = isActive ? '#38bdf8' : style.color;
+    const glowColor = isActive ? '#38bdf8' : style.color;
+    const textColor = isActive ? '#38bdf8' : style.color;
+    
     const size = isActive ? '48px' : '40px';
     const activeClass = isActive ? 'z-50 scale-110' : 'z-10 opacity-90 hover:opacity-100 hover:scale-105';
 
@@ -54,11 +98,11 @@ const createCustomMarker = (project: Project, isActive: boolean) => {
             width: ${size};
             height: ${size};
             background: rgba(15, 23, 42, 0.9);
-            border: 2px solid ${color};
+            border: 2px solid ${borderColor};
             border-radius: 50%;
-            color: ${color};
+            color: ${textColor};
             backdrop-filter: blur(8px);
-            box-shadow: 0 0 ${isActive ? '30px' : '15px'} ${color};
+            box-shadow: 0 0 ${isActive ? '30px' : '15px'} ${glowColor}66;
         ">
             ${iconHtml}
         </div>
