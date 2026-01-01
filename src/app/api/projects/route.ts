@@ -55,7 +55,7 @@ export async function GET() {
       external_link: p.external_link,
       category: p.category,
       is_visible: p.is_visible,
-      impacts: [],
+      impacts: p.impacts || [],
       created_at: p.created_at,
       updated_at: p.updated_at,
     }));
@@ -87,6 +87,7 @@ export async function POST(request: Request) {
         location_lat: body.location?.latitude || body.location_lat,
         location_lng: body.location?.longitude || body.location_lng,
         tech_stack: body.tech_stack || [],
+        impacts: body.impacts || [],
         external_link: body.external_link,
         category: body.category,
         is_visible: body.is_visible ?? true,

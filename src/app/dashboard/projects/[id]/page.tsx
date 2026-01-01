@@ -210,6 +210,7 @@ export default function ProjectFormPage() {
         location_lat: data.latitude,
         location_lng: data.longitude,
         tech_stack: data.tech_stack.filter(t => t.trim() !== ''),
+        impacts: data.impacts.filter(i => i.trim() !== ''),
         external_link: data.external_link || null,
         category: data.category || null,
         is_visible: data.is_visible,
