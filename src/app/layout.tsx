@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Analytics } from '@vercel/analytics/next';
 import { Toaster } from 'sonner';
 import { Providers } from '@/components/Providers';
 import "./globals.css";
@@ -44,6 +45,7 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
+        <Analytics />
         <Toaster 
           position="top-center"
           theme="dark"
