@@ -23,7 +23,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.dhanypedia.com'),
   
   title: {
     default: 'Dhanypedia | GIS Portfolio & Geospatial Analysis',
@@ -33,6 +33,8 @@ export const metadata: Metadata = {
   description: 'Explore professional GIS projects across Asia through an interactive 3D globe. Specializing in geospatial analysis, WebGIS development, spatial data solutions, and mapping technologies.',
   
   keywords: [
+    'Dhany Yudi Prasetyo',
+    'Dhanypedia',
     'GIS Portfolio',
     'Geospatial Analysis',
     'WebGIS Developer',

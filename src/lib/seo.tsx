@@ -12,8 +12,8 @@ export const personSchema: WithContext<Person> = {
   name: 'Dhany Yudi Prasetyo',
   jobTitle: 'GIS Developer & Geospatial Analyst',
   description: 'Professional GIS developer specializing in WebGIS development, geospatial analysis, and interactive mapping solutions across Asia.',
-  url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
-  image: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/og-image.png`,
+  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.dhanypedia.com',
+  image: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.dhanypedia.com'}/og-image.png`,
   sameAs: [
     'https://github.com/dhanyyudi',
     'https://linkedin.com/in/dhanyyudi', // Update with actual profile
@@ -42,7 +42,7 @@ export const websiteSchema: WithContext<WebSite> = {
   '@type': 'WebSite',
   name: 'Dhany Yudi Prasetyo GIS Portfolio',
   description: 'Professional GIS portfolio showcasing geospatial projects across Asia with interactive 3D globe visualization.',
-  url: process.env.NEXT_PUBLIC_SITE_URL || 'http://www.dhanypedia.com',
+  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.dhanypedia.com',
   author: {
     '@type': 'Person',
     name: 'Dhany Yudi Prasetyo',
@@ -52,6 +52,7 @@ export const websiteSchema: WithContext<WebSite> = {
 
 /**
  * Component to inject JSON-LD structured data into page head
+ * Using dangerouslySetInnerHTML to ensure correct script tag execution in Next.js
  */
 export function StructuredData() {
   return (

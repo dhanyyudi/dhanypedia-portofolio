@@ -5,7 +5,7 @@ import { MetadataRoute } from 'next';
  * Automatically includes all public routes
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'www.dhanypedia.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.dhanypedia.com';
   
   // Static routes
   const routes = ['', '/about', '/contact'].map((route) => ({
