@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+
 /* ========== DARK THEME (Default) ========== */
 :root,
 [data-theme="dark"] {
@@ -28,14 +29,20 @@
   /* Shadows */
   --shadow-glow: 0 0 20px rgba(56, 189, 248, 0.3);
   --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+  
+  /* Glass UI Variables */
+  --glass-bg: rgba(15, 23, 42, 0.6);
+  --blur-md: 16px;
+  /* Chat specific */
+  --chat-user-text: #ffffff;
 }
 
-/* ========== LIGHT THEME ========== */
+/* ========== LIGHT THEME with Better Transparency ========== */
 [data-theme="light"] {
-  --background-primary: #f8fafc; /* Slate 50 */
-  --background-secondary: #f1f5f9; /* Slate 100 */
-  --background-tertiary: #e2e8f0; /* Slate 200 */
-  --background-card: rgba(255, 255, 255, 0.9); /* White translucent */
+  --background-primary: rgba(248, 250, 252, 0.85); /* Translucent Slate 50 */
+  --background-secondary: rgba(241, 245, 249, 0.90); /* Translucent Slate 100 */
+  --background-tertiary: rgba(226, 232, 240, 0.90); /* Translucent Slate 200 */
+  --background-card: rgba(255, 255, 255, 0.7); /* More transparent white */
   
   --accent-primary: #0284c7; /* Sky 600 - Darker for contrast */
   --accent-secondary: #0369a1; /* Sky 700 */
@@ -46,7 +53,7 @@
   --text-secondary: #475569; /* Slate 600 */
   --text-muted: #64748b; /* Slate 500 */
   
-  --border-color: #cbd5e1; /* Slate 300 */
+  --border-color: rgba(203, 213, 225, 0.5); /* Translucent Slate 300 */
   --border-glow: rgba(2, 132, 199, 0.3);
   
   /* Gradients */
@@ -56,7 +63,14 @@
   /* Shadows */
   --shadow-glow: 0 0 20px rgba(2, 132, 199, 0.2);
   --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.08);
+  
+  /* Glass UI Variables for Light Mode */
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --blur-md: 16px;
+  /* Chat specific */
+  --chat-user-text: #000000;
 }
+
 
 * {
   box-sizing: border-box;
@@ -135,7 +149,7 @@ a:hover {
   background: var(--gradient-primary);
   border: none;
   border-radius: 8px;
-  color: #0f172a; /* Dark text for contrast on bright button */
+
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
@@ -163,6 +177,7 @@ a:hover {
 .btn-glow:hover {
   box-shadow: var(--shadow-glow);
   transform: translateY(-2px);
+  color: white; /* Ensure white text on hover */
 }
 
 .btn-glow:hover::before {
@@ -176,7 +191,7 @@ a:hover {
   justify-content: center;
   gap: 8px;
   padding: 12px 24px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--background-card);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   color: var(--text-primary);
@@ -189,7 +204,7 @@ a:hover {
 .btn-secondary:hover {
   border-color: var(--accent-primary);
   color: var(--accent-primary);
-  background: rgba(56, 189, 248, 0.1);
+  background: var(--gradient-glow);
 }
 
 /* Input Styles */
@@ -199,7 +214,7 @@ a:hover {
   padding-bottom: 12px;
   padding-left: 16px;
   padding-right: 16px;
-  background: rgba(15, 23, 42, 0.6);
+  background: var(--background-card); /* Use CSS variable instead of hardcoded */
   border: 1px solid var(--border-color);
   border-radius: 8px;
   color: var(--text-primary);
@@ -210,7 +225,7 @@ a:hover {
 .input-field:focus {
   outline: none;
   border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+  box-shadow: 0 0 0 3px var(--border-glow);
 }
 
 .input-field::placeholder {
@@ -401,4 +416,34 @@ textarea.input-field {
   .glass-card {
     border-radius: 12px;
   }
+}
+
+/* Fix btn-glow to have white text */
+.btn-glow {
+  color: white !important;
+}
+
+/* MapLibre Controls - Dark Mode Fix */
+.maplibregl-ctrl-group {
+  background: transparent !important;
+}
+
+.maplibregl-ctrl-group button {
+  background: rgba(15, 23, 42, 0.9) !important;
+  color: white !important;
+  border-color: rgba(56, 189, 248, 0.3) !important;
+}
+
+:root.light .maplibregl-ctrl-group button {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #0f172a !important;
+  border-color: rgba(2, 132, 199, 0.3) !important;
+}
+
+.maplibregl-ctrl-group button:hover {
+  background: rgba(56, 189, 248, 0.2) !important;
+}
+
+:root.light .maplibregl-ctrl-group button:hover {
+  background: rgba(2, 132, 199, 0.1) !important;
 }

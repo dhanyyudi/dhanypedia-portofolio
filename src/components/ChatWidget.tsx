@@ -38,6 +38,42 @@ export default function ChatWidget() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Auto-open on mount
+  useEffect(() => {
+    // Small delay for smoother entrance animation
+    const timer = setTimeout(() => {
+      setIsOpen(true);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Auto-close on scroll or map interaction
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setIsOpen(false);
+      }
+    };
+
+    const handleMapClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      // Check if click is on map canvas or marker
+      if (target.closest('.maplibregl-map') || target.closest('.maplibregl-canvas')) {
+        setIsOpen(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('click', handleMapClick);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('click', handleMapClick);
+    };
+  }, [isOpen]);
+
   // Focus input when opened
   useEffect(() => {
     if (isOpen) {
@@ -131,16 +167,12 @@ export default function ChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-6 right-6 z-[100] w-[380px] max-w-[calc(100vw-48px)] h-[500px] max-h-[calc(100vh-100px)] flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-[var(--border-color)]"
-            style={{ backgroundColor: 'var(--background-secondary)' }}
+            className="fixed bottom-6 right-6 z-[100] w-[380px] max-w-[calc(100vw-48px)] h-[500px] max-h-[calc(100vh-100px)] flex flex-col glass-card overflow-hidden"
           >
             {/* Header */}
-            <div 
-              className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-color)]"
-              style={{ backgroundColor: 'var(--background-tertiary)' }}
-            >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-color)] bg-white/5 dark:bg-black/10">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-[var(--accent-primary)] flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-secondary)] flex items-center justify-center shadow-lg">
                   <Bot size={18} className="text-white" />
                 </div>
                 <div>
@@ -150,7 +182,7 @@ export default function ChatWidget() {
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-2 rounded-lg hover:bg-white/10 transition-colors text-[var(--text-secondary)]"
+                className="p-2 rounded-lg hover:bg-white/10 transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 aria-label="Close chat"
               >
                 <X size={18} />
@@ -166,15 +198,15 @@ export default function ChatWidget() {
                 >
                   <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
                     msg.role === 'user' 
-                      ? 'bg-[var(--text-primary)]' 
+                      ? 'bg-[var(--accent-primary)]' 
                       : 'bg-[var(--background-tertiary)]'
                   }`}>
-                    {msg.role === 'user' ? <User size={14} style={{ color: 'var(--background-primary)' }} /> : <Bot size={14} />}
+                    {msg.role === 'user' ? <User size={14} className="text-white" /> : <Bot size={14} />}
                   </div>
                   <div
                     className={`max-w-[75%] px-3 py-2 rounded-xl text-sm font-medium`}
                     style={msg.role === 'user' 
-                      ? { backgroundColor: 'var(--text-primary)', color: 'var(--background-primary)' } 
+                      ? { backgroundColor: 'var(--accent-primary)', color: 'var(--chat-user-text)' } 
                       : { backgroundColor: 'var(--background-tertiary)', color: 'var(--text-primary)' }
                     }
                   >
@@ -198,10 +230,7 @@ export default function ChatWidget() {
             </div>
 
             {/* Input */}
-            <div 
-              className="p-3 border-t border-[var(--border-color)]"
-              style={{ backgroundColor: 'var(--background-tertiary)' }}
-            >
+            <div className="p-3 border-t border-[var(--border-color)] bg-white/5 dark:bg-black/10">
               <div className="flex items-center gap-2">
                 <input
                   ref={inputRef}

@@ -5,6 +5,7 @@ import { MapPin, ArrowRight, X, ExternalLink, ChevronUp, List, ArrowLeft } from 
 import Link from 'next/link';
 import type { Project } from '@/types';
 import { useState } from 'react';
+import OptimizedImage from './OptimizedImage';
 
 interface ProjectOverlayProps {
   projects: Project[];
@@ -38,7 +39,7 @@ export default function ProjectOverlay({
         `}>
           <div className="h-full flex flex-col glass-card overflow-hidden">
             {/* Header */}
-            <div className="p-4 border-b border-[var(--border-color)] flex justify-between items-center bg-black/20">
+            <div className="p-4 border-b border-[var(--border-color)] flex justify-between items-center bg-white/5 dark:bg-black/20">
               <div>
                 <h2 className="text-xl font-bold bg-gradient-to-r from-white to-[var(--accent-primary)] bg-clip-text text-transparent">
                   Projects / Works
@@ -112,10 +113,13 @@ export default function ProjectOverlay({
                 {/* Image Header */}
                 <div className="relative h-56 shrink-0">
                   {activeProject.media[0] && (
-                    <img 
+                    <OptimizedImage
                       src={activeProject.media[0].url} 
                       alt={activeProject.title}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      sizes="400px"
+                      priority
                     />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#020617]" />
@@ -259,10 +263,13 @@ export default function ProjectOverlay({
                 {/* Image Header */}
                 <div className="relative h-48">
                   {activeProject.media[0] && (
-                    <img 
+                    <OptimizedImage
                       src={activeProject.media[0].url} 
                       alt={activeProject.title}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      sizes="100vw"
+                      priority
                     />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[var(--background-primary)]" />

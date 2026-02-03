@@ -1,0 +1,15 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Disallow admin/dashboard routes
+User-agent: *
+Disallow: /dashboard/
+Disallow: /api/
+
+# Allow specific API endpoints for indexing
+User-agent: *
+Allow: /api/projects
+
+# Sitemap location
+Sitemap: ${process.env.NEXT_PUBLIC_SITE_URL || 'http://www.dhanypedia.com'}/sitemap.xml

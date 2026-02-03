@@ -190,7 +190,7 @@ export default function AboutPage() {
                       ))}
                     </div>
 
-                    <div className="space-y-4 text-left bg-black/20 p-4 rounded-xl border border-white/5">
+                    <div className="space-y-4 text-left bg-white/5 dark:bg-black/20 p-4 rounded-xl border border-[var(--border-color)]">
                         <div className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
                             <MapPin size={16} className="text-[var(--accent-secondary)]" />
                             <span>Indonesia based</span>

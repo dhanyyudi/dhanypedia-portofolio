@@ -109,11 +109,14 @@ const GlobeComponent = ({ projects, activeProject, onProjectClick, onZoomIn, is2
     try {
       const Globe = (await import('globe.gl')).default;
 
-      // @ts-ignore
+      // @ts-ignore - Optimized globe configuration for better performance
       const globe = Globe()(globeRef.current)
-        .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
-        .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
-        .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
+        // Use smaller resolution earth texture (1024x512 instead of 2048x1024)
+        .globeImageUrl('//unpkg.com/three-globe@2.31.1/example/img/earth-blue-marble.jpg')
+        // Remove bump map for better performance (saves ~2MB download)
+        // .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
+        // Use solid color background instead of image for faster rendering
+        .backgroundColor('rgba(12, 25, 41, 1)')
         .showAtmosphere(true)
         .atmosphereColor('#38bdf8')
         .atmosphereAltitude(0.15)
@@ -286,16 +289,7 @@ const GlobeComponent = ({ projects, activeProject, onProjectClick, onZoomIn, is2
     return (
       <div className="globe-container flex flex-col items-center justify-center bg-gradient-to-b from-[#0c1929] to-[#020617]">
         <div className="relative w-full h-full flex items-center justify-center">
-          {/* Static world map background */}
-          <div 
-            className="absolute inset-0 opacity-30"
-            style={{
-              backgroundImage: 'url(//unpkg.com/three-globe/example/img/earth-blue-marble.jpg)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              filter: 'blur(2px)'
-            }}
-          />
+          {/* Removed static world map background for better performance */}
           
           {/* Center content */}
           <div className="relative z-10 text-center p-6">

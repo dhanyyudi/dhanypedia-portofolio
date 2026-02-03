@@ -28,8 +28,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (stored && (stored === 'dark' || stored === 'light')) {
       setThemeState(stored);
       document.documentElement.setAttribute('data-theme', stored);
+      // Add class for Tailwind dark: variants
+      if (stored === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.add('light');
+        document.documentElement.classList.remove('dark');
+      }
     } else {
       document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
     }
   }, []);
 
@@ -37,6 +47,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (mounted) {
       document.documentElement.setAttribute('data-theme', theme);
       localStorage.setItem('theme', theme);
+      // Update classes for Tailwind and custom CSS
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.add('light');
+        document.documentElement.classList.remove('dark');
+      }
     }
   }, [theme, mounted]);
 

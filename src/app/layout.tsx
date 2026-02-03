@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import { Analytics } from '@vercel/analytics/next';
 import { Toaster } from 'sonner';
 import { Providers } from '@/components/Providers';
+import { StructuredData } from '@/lib/seo';
 import "./globals.css";
 
 const inter = Inter({
@@ -21,14 +22,88 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Dhanypedia | GIS Portfolio",
-  description: "Explore my GIS projects across Asia through an interactive 3D globe experience. Specializing in geospatial analysis, mapping, and spatial data solutions.",
-  keywords: ["GIS", "Portfolio", "Geospatial", "Mapping", "Indonesia", "Asia", "Spatial Analysis"],
-  authors: [{ name: "Dhanypedia" }],
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  
+  title: {
+    default: 'Dhanypedia | GIS Portfolio & Geospatial Analysis',
+    template: '%s | Dhanypedia'
+  },
+  
+  description: 'Explore professional GIS projects across Asia through an interactive 3D globe. Specializing in geospatial analysis, WebGIS development, spatial data solutions, and mapping technologies.',
+  
+  keywords: [
+    'GIS Portfolio',
+    'Geospatial Analysis',
+    'WebGIS Developer',
+    'Spatial Data Solutions',
+    'Interactive Mapping',
+    'Indonesia GIS',
+    'Asia Geospatial',
+    '3D Globe Visualization',
+    'MapLibre GL JS',
+    'QGIS',
+    'PostGIS',
+    'Cartography',
+    'Remote Sensing',
+    'Spatial Database',
+    'GIS Consultant'
+  ],
+  
+  authors: [{ name: 'Dhanypedia', url: 'https://github.com/dhanypedia' }],
+  creator: 'Dhanypedia',
+  publisher: 'Dhanypedia',
+  
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  
   openGraph: {
-    title: "Dhanypedia | GIS Portfolio",
-    description: "Explore my GIS projects across Asia through an interactive 3D globe experience.",
-    type: "website",
+    type: 'website',
+    locale: 'en_US',
+    url: '/',
+    siteName: 'Dhanypedia GIS Portfolio',
+    title: 'Dhanypedia | GIS Portfolio & Geospatial Analysis',
+    description: 'Explore professional GIS projects across Asia through an interactive 3D globe. Specializing in geospatial analysis, WebGIS development, and spatial data solutions.',
+    images: [
+      {
+        url: '/og-image.png', // We'll create this
+        width: 1200,
+        height: 630,
+        alt: 'Dhanypedia GIS Portfolio - Interactive 3D Globe with Projects',
+        type: 'image/png',
+      }
+    ],
+  },
+  
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Dhanypedia | GIS Portfolio & Geospatial Analysis',
+    description: 'Explore professional GIS projects across Asia through an interactive 3D globe.',
+    images: ['/og-image.png'],
+    creator: '@dhanypedia', // Update with actual Twitter handle if available
+  },
+  
+  verification: {
+    // Add when you set up Google Search Console
+    // google: 'your-google-verification-code',
+  },
+  
+  alternates: {
+    canonical: '/',
+  },
+  
+  other: {
+    'theme-color': '#38bdf8', // Cyan accent color
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
   },
 };
 
@@ -42,6 +117,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased`}
       >
+        {/* SEO Structured Data */}
+        <StructuredData />
+        
         <Providers>
           {children}
         </Providers>
