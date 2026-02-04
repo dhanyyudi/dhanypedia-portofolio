@@ -151,7 +151,7 @@ export default function ChatWidget() {
       {/* Chat Button */}
       <motion.button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 z-[100] p-4 rounded-full bg-[var(--accent-primary)] text-white shadow-lg hover:scale-110 transition-transform ${isOpen ? 'hidden' : ''}`}
+        className={`fixed bottom-28 right-6 z-[100] p-4 rounded-full bg-[var(--accent-primary)] text-white shadow-lg hover:scale-110 transition-transform ${isOpen ? 'hidden' : ''}`}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         aria-label="Open chat"
@@ -167,7 +167,7 @@ export default function ChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-6 right-6 z-[100] w-[380px] max-w-[calc(100vw-48px)] h-[500px] max-h-[calc(100vh-100px)] flex flex-col glass-card overflow-hidden"
+            className="fixed bottom-28 right-6 z-[100] w-[380px] max-w-[calc(100vw-48px)] h-[500px] max-h-[calc(100vh-100px)] flex flex-col glass-card overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-color)] bg-white/5 dark:bg-black/10">
@@ -177,7 +177,7 @@ export default function ChatWidget() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-sm text-[var(--text-primary)]">{t('chat.title')}</h3>
-                  <span className="text-xs text-[var(--text-muted)]">Powered by Gemini AI</span>
+                  <span className="text-xs text-[var(--text-muted)]">Your Personal Guide</span>
                 </div>
               </div>
               <button
@@ -206,7 +206,7 @@ export default function ChatWidget() {
                   <div
                     className={`max-w-[75%] px-3 py-2 rounded-xl text-sm font-medium`}
                     style={msg.role === 'user' 
-                      ? { backgroundColor: 'var(--accent-primary)', color: 'var(--chat-user-text)' } 
+                      ? { backgroundColor: 'var(--accent-primary)', color: '#ffffff', fontWeight: 600 } 
                       : { backgroundColor: 'var(--background-tertiary)', color: 'var(--text-primary)' }
                     }
                   >

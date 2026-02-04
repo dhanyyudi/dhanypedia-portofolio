@@ -43,6 +43,7 @@ export default function LoginPage() {
     try {
       await signIn(data.email, data.password);
       toast.success('Welcome back!');
+      // Redirect to dashboard after successful login
       router.push('/dashboard');
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Invalid email or password';

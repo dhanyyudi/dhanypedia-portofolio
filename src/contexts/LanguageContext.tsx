@@ -50,7 +50,7 @@ const translations: Record<Language, Record<string, string>> = {
     'project.backToGlobe': 'Back to Globe',
     
     // Chatbot
-    'chat.title': 'Portfolio Assistant',
+    'chat.title': 'Dhanypedia Assistant',
     'chat.placeholder': 'Ask about my projects...',
     'chat.send': 'Send',
     'chat.thinking': 'Thinking...',
@@ -106,7 +106,7 @@ const translations: Record<Language, Record<string, string>> = {
     'project.backToGlobe': 'Kembali ke Globe',
     
     // Chatbot
-    'chat.title': 'Asisten Portofolio',
+    'chat.title': 'Asisten Dhanypedia',
     'chat.placeholder': 'Tanya tentang proyek saya...',
     'chat.send': 'Kirim',
     'chat.thinking': 'Berpikir...',

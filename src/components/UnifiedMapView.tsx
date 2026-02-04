@@ -114,78 +114,91 @@ export default function UnifiedMapView({ projects, activeProject, onProjectClick
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    map.current = new maplibregl.Map({
-      container: mapContainer.current,
-      style: getMapStyle(theme),
-      center: [115, 5], // Center on Southeast Asia
-      zoom: 2.5,
-      attributionControl: {
-        compact: true
-      }
-    });
+    try {
+      map.current = new maplibregl.Map({
+        container: mapContainer.current,
+        style: getMapStyle(theme),
+        center: [115, 5], // Center on Southeast Asia
+        zoom: 2.5,
+        attributionControl: {
+          compact: true
+        }
+      });
 
-    // Add navigation controls (zoom +/- buttons) on the right side below toggle button
-    map.current.addControl(new maplibregl.NavigationControl(), 'top-right');
-    
-    // Push zoom controls below toggle button with custom CSS
-    setTimeout(() => {
-      const topRightControls = document.querySelector('.maplibregl-ctrl-top-right');
-      if (topRightControls) {
-        (topRightControls as HTMLElement).style.marginTop = '168px';  // Push down to below toggle button (mobile)
-        (topRightControls as HTMLElement).style.marginRight = '16px';  // Align with toggle button
-        
-        // Adjust for desktop  
-        const mediaQuery = window.matchMedia('(min-width: 768px)');
-        const adjustMargin = () => {
-          if (topRightControls) {
-            (topRightControls as HTMLElement).style.marginTop = mediaQuery.matches ? '152px' : '168px';
-            (topRightControls as HTMLElement).style.marginRight = mediaQuery.matches ? '24px' : '16px';
+      // Add navigation controls (zoom +/- buttons)
+      map.current.addControl(new maplibregl.NavigationControl(), 'top-right');
+      
+      // Push zoom controls below toggle button
+      setTimeout(() => {
+        const topRightControls = document.querySelector('.maplibregl-ctrl-top-right');
+        if (topRightControls) {
+          (topRightControls as HTMLElement).style.marginTop = '168px';
+          (topRightControls as HTMLElement).style.marginRight = '16px';
+          const mediaQuery = window.matchMedia('(min-width: 768px)');
+          const adjustMargin = () => {
+            if (topRightControls) {
+              (topRightControls as HTMLElement).style.marginTop = mediaQuery.matches ? '152px' : '168px';
+              (topRightControls as HTMLElement).style.marginRight = mediaQuery.matches ? '24px' : '16px';
+            }
+          };
+          adjustMargin();
+          mediaQuery.addEventListener('change', adjustMargin);
+        }
+      }, 100);
+
+      // Set globe projection AFTER style loads
+      map.current.on('style.load', () => {
+        if (!map.current) return;
+        setIsStyleLoaded(true);
+        try {
+          map.current.setProjection({ type: 'globe' } as any);
+          setIsMapLoaded(true);
+        } catch (e) {
+          console.warn('Projection set failed:', e);
+        }
+      });
+
+      // Listen for zoom changes
+      map.current.on('zoom', () => {
+        if (!map.current || !isStyleLoaded) return;
+        try {
+          if (!map.current.isStyleLoaded()) return;
+          const zoom = map.current.getZoom();
+          if (zoom >= 6 && isGlobeView) {
+            map.current.setProjection({ type: 'mercator' } as any);
+            setIsGlobeView(false);
+          } else if (zoom < 6 && !isGlobeView) {
+            map.current.setProjection({ type: 'globe' } as any);
+            setIsGlobeView(true);
           }
-        };
-        adjustMargin();
-        mediaQuery.addEventListener('change', adjustMargin);
+        } catch (e) {
+          // Ignore zoom errors
+        }
+      });
+
+      // Error handling for map
+      map.current.on('error', (e) => {
+        console.warn('Map error:', e);
+      });
+
+    } catch (error) {
+      console.error('Failed to initialize map (likely WebGL missing):', error);
+      // Fallback behavior - we could set a state here to show a static image or message
+      if (mapContainer.current) {
+        mapContainer.current.innerHTML = '<div class="flex items-center justify-center h-full text-white/50 bg-slate-900">Map unavailable (WebGL required)</div>';
       }
-    }, 100);
-
-    // Set globe projection AFTER style loads
-    map.current.on('style.load', () => {
-      if (!map.current) return;
-      setIsStyleLoaded(true);
-      map.current.setProjection({ type: 'globe' } as any);
-      setIsMapLoaded(true);
-    });
-
-    // Listen for zoom changes to auto-switch projection
-    map.current.on('zoom', () => {
-      if (!map.current || !isStyleLoaded) return;  // GUARD: check style loaded
-      
-      // Additional guard: check if style is actually loaded
-      try {
-        if (!map.current.isStyleLoaded()) return;
-      } catch (e) {
-        return;  // Skip if error checking style
-      }
-      
-      const zoom = map.current.getZoom();
-      
-      // Auto-switch: zoom >= 6 = flat map, zoom < 6 = globe
-      if (zoom >= 6 && isGlobeView) {
-        map.current.setProjection({ type: 'mercator' } as any);
-        setIsGlobeView(false);
-      } else if (zoom < 6 && !isGlobeView) {
-        map.current.setProjection({ type: 'globe' } as any);
-        setIsGlobeView(true);
-      }
-    });
-
-
+    }
 
     // Cleanup
     return () => {
-      markersRef.current.forEach(marker => marker.remove());
-      markersRef.current.clear();
-      map.current?.remove();
-      map.current = null;
+      try {
+        markersRef.current.forEach(marker => marker.remove());
+        markersRef.current.clear();
+        map.current?.remove();
+        map.current = null;
+      } catch (e) {
+        // Ignore cleanup errors
+      }
     };
   }, []);
 

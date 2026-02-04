@@ -13,7 +13,8 @@ import {
   Eye,
   EyeOff,
   ExternalLink,
-  MapPin
+  MapPin,
+  FileText
 } from 'lucide-react';
 import { getSession, signOut } from '@/lib/supabase';
 import Tooltip from '@/components/Tooltip';
@@ -227,6 +228,31 @@ export default function DashboardPage() {
             </div>
           </motion.div>
         </div>
+
+        {/* CV Builder Quick Access */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="glass-card p-6 mb-8 cursor-pointer hover:border-[var(--accent-primary)] transition-colors"
+          onClick={() => router.push('/dashboard/cv')}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-gradient-to-br from-[var(--accent-primary)]/20 to-[var(--accent-secondary)]/20">
+                <FileText size={24} className="text-[var(--accent-primary)]" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-[var(--text-primary)]">CV Builder</h3>
+                <p className="text-[var(--text-muted)] text-sm">Create ATS-friendly resumes tailored to job applications</p>
+              </div>
+            </div>
+            <button className="btn-glow py-2 px-4 text-sm">
+              <Plus size={16} />
+              Manage CVs
+            </button>
+          </div>
+        </motion.div>
 
         {/* Projects Section */}
         <section className="mb-8">
