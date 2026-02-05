@@ -12,4 +12,4 @@ User-agent: *
 Allow: /api/projects
 
 # Sitemap location
-Sitemap: ${process.env.NEXT_PUBLIC_SITE_URL || 'http://www.dhanypedia.com'}/sitemap.xml
+Sitemap: https://www.dhanypedia.com/sitemap.xml

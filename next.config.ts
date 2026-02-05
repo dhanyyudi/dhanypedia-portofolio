@@ -1,6 +1,23 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Force www version to prevent duplicate content
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'dhanypedia.com',
+          },
+        ],
+        destination: 'https://www.dhanypedia.com/:path*',
+        permanent: true,
+      },
+    ];
+  },
+  
   images: {
     // Allow external image domains
     remotePatterns: [

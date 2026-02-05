@@ -82,7 +82,10 @@ export function generatePageMetadata(params: {
   path?: string;
   image?: string;
 }): Metadata {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.dhanypedia.com';
   const { title, description, path = '/', image = '/og-image.png' } = params;
+  const fullUrl = `${baseUrl}${path}`;
+  const fullImageUrl = image.startsWith('http') ? image : `${baseUrl}${image}`;
   
   return {
     title,
@@ -90,10 +93,10 @@ export function generatePageMetadata(params: {
     openGraph: {
       title,
       description,
-      url: path,
+      url: fullUrl,
       images: [
         {
-          url: image,
+          url: fullImageUrl,
           width: 1200,
           height: 630,
           alt: title,
@@ -104,10 +107,10 @@ export function generatePageMetadata(params: {
       card: 'summary_large_image',
       title,
       description,
-      images: [image],
+      images: [fullImageUrl],
     },
     alternates: {
-      canonical: path,
+      canonical: fullUrl,
     },
   };
 }
