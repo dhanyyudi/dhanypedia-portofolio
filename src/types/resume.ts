@@ -122,6 +122,7 @@ export interface Resume {
   slug: string;
   content: JSONResume;
   is_public: boolean;
+  is_featured?: boolean;
   created_at: string;
   updated_at: string;
 }

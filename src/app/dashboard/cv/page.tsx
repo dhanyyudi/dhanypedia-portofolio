@@ -12,7 +12,9 @@ import {
   EyeOff, 
   ExternalLink,
   Download,
-  ArrowLeft
+  ArrowLeft,
+  Copy,
+  Star
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Resume } from '@/types/resume';
@@ -24,6 +26,8 @@ export default function CVListPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [resumeToDelete, setResumeToDelete] = useState<Resume | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
+  const [featuringId, setFeaturingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchResumes();
@@ -93,6 +97,57 @@ export default function CVListPage() {
     setIsDeleting(false);
   };
 
+  const handleDuplicate = async (resume: Resume) => {
+    setDuplicatingId(resume.id);
+    
+    try {
+      const response = await fetch(`/api/cv/${resume.id}/duplicate`, {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        const newResume = await response.json();
+        setResumes(prev => [newResume, ...prev]);
+        toast.success(`"${resume.title}" duplicated successfully`);
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Failed to duplicate resume');
+      }
+    } catch (error) {
+      console.error('Duplicate error:', error);
+      toast.error('Failed to duplicate resume');
+    }
+    setDuplicatingId(null);
+  };
+
+  const handleSetFeatured = async (resume: Resume) => {
+    setFeaturingId(resume.id);
+    
+    try {
+      const response = await fetch('/api/cv/featured', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resume_id: resume.id }),
+      });
+
+      if (response.ok) {
+        // Update all resumes to reflect the new featured status
+        setResumes(prev => prev.map(r => ({
+          ...r,
+          is_featured: r.id === resume.id
+        })));
+        toast.success(`"${resume.title}" is now featured on About page`);
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Failed to set featured CV');
+      }
+    } catch (error) {
+      console.error('Set featured error:', error);
+      toast.error('Failed to set featured CV');
+    }
+    setFeaturingId(null);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[var(--background-primary)] flex items-center justify-center">
@@ -127,6 +182,21 @@ export default function CVListPage() {
           </button>
         </div>
 
+        {/* Info Banner */}
+        <div className="glass-card p-4 mb-6 border-l-4 border-l-yellow-500">
+          <div className="flex items-start gap-3">
+            <Star size={20} className="text-yellow-500 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm text-[var(--text-primary)] font-medium">Featured CV</p>
+              <p className="text-sm text-[var(--text-secondary)] mt-1">
+                Click the <Star size={12} className="inline" /> star icon on any CV to make it the featured CV. 
+                The featured CV will automatically appear on your About page for visitors to download. 
+                Only public CVs can be featured.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Resume Grid */}
         {resumes.length === 0 ? (
           <motion.div
@@ -158,11 +228,22 @@ export default function CVListPage() {
                 className="glass-card p-6 flex items-center justify-between"
               >
                 <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-lg bg-[var(--accent-primary)]/10">
-                    <FileText size={24} className="text-[var(--accent-primary)]" />
+                  <div className={`p-3 rounded-lg ${resume.is_featured ? 'bg-yellow-500/20' : 'bg-[var(--accent-primary)]/10'} relative`}>
+                    <FileText size={24} className={resume.is_featured ? 'text-yellow-500' : 'text-[var(--accent-primary)]'} />
+                    {resume.is_featured && (
+                      <Star size={12} className="absolute -top-1 -right-1 text-yellow-500 fill-yellow-500" />
+                    )}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-[var(--text-primary)]">{resume.title}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-[var(--text-primary)]">{resume.title}</h3>
+                      {resume.is_featured && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-500 border border-yellow-500/30">
+                          <Star size={10} className="fill-yellow-500" />
+                          Featured on About
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-[var(--text-muted)]">
                       /{resume.slug} • Updated {new Date(resume.updated_at).toLocaleDateString()}
                     </p>
@@ -195,18 +276,52 @@ export default function CVListPage() {
                     </a>
                   )}
 
+                  {/* Featured Toggle */}
+                  <button
+                    onClick={() => handleSetFeatured(resume)}
+                    disabled={featuringId === resume.id || resume.is_featured}
+                    className={`p-2 rounded-lg transition-colors disabled:opacity-50 ${
+                      resume.is_featured
+                        ? 'bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30'
+                        : 'hover:bg-[var(--background-tertiary)] text-[var(--text-muted)] hover:text-yellow-500'
+                    }`}
+                    title={resume.is_featured ? 'Featured on About page' : 'Set as featured on About page'}
+                  >
+                    {featuringId === resume.id ? (
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Star size={16} className={resume.is_featured ? 'fill-yellow-500' : ''} />
+                    )}
+                  </button>
+
                   {/* Download PDF */}
                   <a
                     href={`/api/cv/${resume.id}/pdf`}
                     className="p-2 rounded-lg hover:bg-[var(--background-tertiary)] text-[var(--text-muted)] hover:text-[var(--accent-primary)] transition-colors"
+                    title="Download PDF"
                   >
                     <Download size={16} />
                   </a>
+
+                  {/* Duplicate */}
+                  <button
+                    onClick={() => handleDuplicate(resume)}
+                    disabled={duplicatingId === resume.id}
+                    className="p-2 rounded-lg hover:bg-[var(--background-tertiary)] text-[var(--text-muted)] hover:text-[var(--accent-primary)] transition-colors disabled:opacity-50"
+                    title="Duplicate"
+                  >
+                    {duplicatingId === resume.id ? (
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Copy size={16} />
+                    )}
+                  </button>
 
                   {/* Edit */}
                   <button
                     onClick={() => router.push(`/dashboard/cv/${resume.id}/edit`)}
                     className="p-2 rounded-lg hover:bg-[var(--background-tertiary)] text-[var(--text-muted)] hover:text-[var(--accent-primary)] transition-colors"
+                    title="Edit"
                   >
                     <Edit size={16} />
                   </button>

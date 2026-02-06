@@ -44,3 +44,10 @@ next-env.d.ts
 service-account.json
 GIS_Portfolio_PRD_v1.0.pdf
 dhany-cv-data.json
+
+# agents
+AGENTS.md
+
+# supabase
+supabase/.temp/
+supabase/config.toml

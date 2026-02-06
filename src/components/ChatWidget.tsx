@@ -177,7 +177,7 @@ export default function ChatWidget() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-sm text-[var(--text-primary)]">{t('chat.title')}</h3>
-                  <span className="text-xs text-[var(--text-muted)]">Your Personal Guide</span>
+                  <span className="text-xs text-[var(--chat-subtitle-text)]">Your Personal Guide</span>
                 </div>
               </div>
               <button
@@ -201,16 +201,16 @@ export default function ChatWidget() {
                       ? 'bg-[var(--accent-primary)]' 
                       : 'bg-[var(--background-tertiary)]'
                   }`}>
-                    {msg.role === 'user' ? <User size={14} className="text-white" /> : <Bot size={14} />}
+                    {msg.role === 'user' ? <User size={14} className="text-white" /> : <Bot size={14} className="text-[var(--text-primary)]" />}
                   </div>
                   <div
-                    className={`max-w-[75%] px-3 py-2 rounded-xl text-sm font-medium`}
-                    style={msg.role === 'user' 
-                      ? { backgroundColor: 'var(--accent-primary)', color: '#ffffff', fontWeight: 600 } 
-                      : { backgroundColor: 'var(--background-tertiary)', color: 'var(--text-primary)' }
-                    }
+                    className={`max-w-[75%] px-3 py-2 rounded-xl text-sm font-medium ${
+                      msg.role === 'user'
+                        ? 'bg-[var(--accent-primary)] text-white'
+                        : 'bg-[var(--chat-assistant-bg)] text-[var(--chat-assistant-text)] border border-[var(--chat-assistant-border)]'
+                    }`}
                   >
-                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                    <p className={`whitespace-pre-wrap ${msg.role === 'user' ? '!text-white' : 'text-[var(--chat-assistant-text)]'}`}>{msg.content}</p>
                   </div>
                 </div>
               ))}
@@ -218,7 +218,7 @@ export default function ChatWidget() {
               {isLoading && (
                 <div className="flex items-start gap-2">
                   <div className="w-7 h-7 rounded-full bg-[var(--background-tertiary)] flex items-center justify-center">
-                    <Bot size={14} />
+                    <Bot size={14} className="text-[var(--text-primary)]" />
                   </div>
                   <div className="px-3 py-2 rounded-xl bg-[var(--background-tertiary)]">
                     <Loader2 size={16} className="animate-spin text-[var(--accent-primary)]" />
@@ -239,7 +239,7 @@ export default function ChatWidget() {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder={t('chat.placeholder')}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-[var(--background-secondary)] border border-[var(--border-color)] text-[var(--text-primary)] text-sm placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-primary)]"
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-[var(--chat-input-bg)] border border-[var(--chat-input-border)] text-[var(--chat-input-text)] text-sm placeholder:text-[var(--chat-input-placeholder)] focus:outline-none focus:border-[var(--accent-primary)]"
                   disabled={isLoading}
                 />
                 <button

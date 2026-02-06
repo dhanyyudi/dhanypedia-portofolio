@@ -207,9 +207,14 @@ export default function AboutPage() {
                     
                     <button 
                         onClick={handleDownloadCV}
-                        className="w-full mt-6 btn-glow py-3 text-sm tracking-wider uppercase font-semibold"
+                        className="w-full mt-6 btn-glow py-3 text-sm tracking-wider uppercase font-semibold relative group"
                     >
                         {about.cv_url ? "Download CV" : "CV Not Available"}
+                        {about.featured_cv_url && (
+                          <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-[var(--background-tertiary)] text-xs text-[var(--text-secondary)] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-[var(--border-color)]">
+                            From CV Builder
+                          </span>
+                        )}
                     </button>
 
                     <a 

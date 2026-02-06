@@ -35,6 +35,15 @@
   --blur-md: 16px;
   /* Chat specific */
   --chat-user-text: #ffffff;
+  --chat-assistant-bg: #1e293b;
+  --chat-assistant-text: #f8fafc;
+  --chat-assistant-border: #334155;
+  --chat-subtitle-text: #94a3b8;
+  --chat-input-bg: #0f172a;
+  --chat-input-border: #334155;
+  --chat-input-text: #f8fafc;
+  --chat-input-placeholder: #64748b;
+  --modal-overlay-bg: rgba(0, 0, 0, 0.8);
 }
 
 /* ========== LIGHT THEME with Better Transparency ========== */
@@ -69,6 +78,15 @@
   --blur-md: 16px;
   /* Chat specific */
   --chat-user-text: #ffffff;
+  --chat-assistant-bg: #ffffff;
+  --chat-assistant-text: #0f172a;
+  --chat-assistant-border: #e2e8f0;
+  --chat-subtitle-text: #475569;
+  --chat-input-bg: #ffffff;
+  --chat-input-border: #cbd5e1;
+  --chat-input-text: #0f172a;
+  --chat-input-placeholder: #94a3b8;
+  --modal-overlay-bg: rgba(0, 0, 0, 0.5);
 }
 
 
@@ -354,7 +372,7 @@ textarea.input-field {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--modal-overlay-bg);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;

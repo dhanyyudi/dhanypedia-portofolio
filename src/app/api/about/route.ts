@@ -1,6 +1,27 @@
 import { NextResponse } from 'next/server';
 import { supabase, createServerSupabaseClient } from '@/lib/supabase';
 
+// Helper to get featured CV PDF URL
+async function getFeaturedCVUrl() {
+  try {
+    const { data } = await supabase
+      .from('resumes')
+      .select('id, slug')
+      .eq('is_featured', true)
+      .eq('is_public', true)
+      .maybeSingle();
+    
+    if (data) {
+      // Return the PDF API URL
+      return `/api/cv/${data.id}/pdf`;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting featured CV:', error);
+    return null;
+  }
+}
+
 // GET about data (public read)
 export async function GET() {
   try {
@@ -22,10 +43,15 @@ export async function GET() {
       .select('*')
       .order('display_order', { ascending: true });
 
-    // Combine data
+    // Get featured CV URL
+    const featuredCVUrl = await getFeaturedCVUrl();
+
+    // Combine data - prefer featured CV URL over stored cv_url
     const result = {
       ...(aboutData || {}),
-      social_links: socialLinks || []
+      social_links: socialLinks || [],
+      featured_cv_url: featuredCVUrl,
+      cv_url: featuredCVUrl || aboutData?.cv_url || null,
     };
 
     return NextResponse.json(result);

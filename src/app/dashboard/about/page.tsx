@@ -16,7 +16,10 @@ import {
   Github,
   Linkedin,
   Twitter,
-  Mail
+  Mail,
+  Star,
+  FileText,
+  ExternalLink
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { getSession, uploadImage } from '@/lib/supabase';
@@ -50,7 +53,6 @@ export default function EditAboutPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const [uploadingCV, setUploadingCV] = useState(false);
   
   // Form state
   const [name, setName] = useState('');
@@ -113,22 +115,6 @@ export default function EditAboutPage() {
       toast.error('Failed to upload photo');
     } finally {
       setUploadingPhoto(false);
-    }
-  };
-
-  const handleCVUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadingCV(true);
-    try {
-      const url = await uploadImage(file, 'portofolio_assets');
-      setCvUrl(url);
-      toast.success('CV uploaded successfully');
-    } catch (error) {
-      console.error('Upload failed:', error);
-      toast.error('Failed to upload CV');
-    } finally {
-      setUploadingCV(false);
     }
   };
 
@@ -240,19 +226,42 @@ export default function EditAboutPage() {
               </div>
             </div>
 
-            {/* CV Upload */}
+            {/* CV Info - Now managed via CV Builder */}
             <div>
                <label className="label">Resume / CV (PDF)</label>
-               <div className="flex gap-3 items-center">
-                  <label className="btn-secondary py-2 px-4 text-sm cursor-pointer min-w-[120px] text-center">
-                     {uploadingCV ? 'Uploading...' : 'Upload PDF'}
-                     <input type="file" accept="application/pdf" className="hidden" onChange={handleCVUpload} disabled={uploadingCV} />
-                  </label>
-                  {cvUrl && <span className="text-xs text-green-500 flex items-center gap-1">✅ File Uploaded</span>}
+               <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
+                  <div className="flex items-start gap-3">
+                     <Star size={18} className="text-yellow-500 mt-0.5 flex-shrink-0" />
+                     <div>
+                        <p className="text-sm text-[var(--text-primary)] font-medium">
+                           CV is now managed via CV Builder
+                        </p>
+                        <p className="text-xs text-[var(--text-secondary)] mt-1">
+                           The &quot;Download CV&quot; button on your About page now uses the 
+                           <strong className="text-yellow-500"> Featured CV</strong> from your CV Builder.
+                        </p>
+                        <button
+                           onClick={() => router.push('/dashboard/cv')}
+                           className="mt-3 inline-flex items-center gap-2 text-xs text-[var(--accent-primary)] hover:text-[var(--accent-secondary)] transition-colors"
+                        >
+                           <FileText size={14} />
+                           Go to CV Builder
+                           <ExternalLink size={12} />
+                        </button>
+                     </div>
+                  </div>
                </div>
-               <p className="text-xs text-[var(--text-muted)] mt-2">
-                  Used for the "Download CV" button.
-               </p>
+               {cvUrl && !cvUrl.includes('/api/cv/') && (
+                  <p className="text-xs text-[var(--text-muted)] mt-2">
+                     Legacy CV still exists but won&apos;t be used. 
+                     <button 
+                        onClick={() => setCvUrl('')} 
+                        className="text-red-500 hover:underline ml-1"
+                     >
+                        Remove
+                     </button>
+                  </p>
+               )}
             </div>
 
             <div className="md:col-span-2">
