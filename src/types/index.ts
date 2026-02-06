@@ -59,6 +59,7 @@ export interface About {
   photo?: string;
   photo_url?: string; // Supabase variant
   cv_url?: string;
+  featured_cv_url?: string; // From CV Builder featured CV
   summary: string;
   skills: Skill[];
   experience: Experience[];
