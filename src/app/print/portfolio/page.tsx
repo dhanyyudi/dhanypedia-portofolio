@@ -73,7 +73,17 @@ export default function PrintPortfolioPage() {
       }
     };
     fetchData();
-  }, []);
+
+    // Set document title for PDF
+    document.title = `${about?.name || 'Portfolio'} - Print`;
+    
+    // Add print-specific class to body
+    document.body.classList.add('printing');
+    
+    return () => {
+      document.body.classList.remove('printing');
+    };
+  }, [about?.name]);
 
   const getYouTubeThumbnail = (url: string) => {
     const match = url.match(/(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/watch\?.+&v=))([\w-]{11})/);
@@ -101,10 +111,12 @@ export default function PrintPortfolioPage() {
       {/* Control Bar - Hidden when printing */}
       <div className="no-print" style={{ 
         position: 'fixed', top: 0, left: 0, right: 0, 
-        backgroundColor: theme === 'dark' ? '#1e293b' : '#2563eb', 
+        backgroundColor: theme === 'dark' ? '#1e293b' : '#1e40af', 
         color: '#fff', 
         padding: '12px 24px', zIndex: 50,
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        printColorAdjust: 'exact',
+        WebkitPrintColorAdjust: 'exact'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
           <strong>Portfolio Preview</strong>
@@ -148,23 +160,25 @@ export default function PrintPortfolioPage() {
         
         {/* ========== COVER PAGE ========== */}
         <div className="page" style={{ 
-          minHeight: '100vh', 
-          padding: '60px',
+          padding: '40px 48px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
-          backgroundColor: colors.bg
+          backgroundColor: colors.bg,
+          boxSizing: 'border-box'
         }}>
           <div style={{ maxWidth: '800px' }}>
-            <h1 style={{ 
-              fontSize: '56px', 
-              fontWeight: 'bold', 
-              color: colors.text,
-              marginBottom: '16px',
-              lineHeight: 1.1
-            }}>
-              {about?.name || 'My Portfolio'}
-            </h1>
+            <div style={{ marginBottom: '16px' }}>
+              <span style={{ 
+                fontSize: '56px', 
+                fontWeight: 'bold', 
+                color: '#000000',
+                lineHeight: 1.1,
+                display: 'inline-block'
+              }}>
+                {about?.name || 'Dhany Yudi Prasetyo'}
+              </span>
+            </div>
             
             <h2 style={{ 
               fontSize: '24px', 
@@ -224,19 +238,21 @@ export default function PrintPortfolioPage() {
         {/* ========== PROJECT PAGES ========== */}
         {projects.map((project, projectIndex) => (
           <div key={project.id} className="page" style={{ 
-            minHeight: '100vh', 
-            padding: '48px',
+            padding: '36px 48px',
             backgroundColor: colors.bg,
-            pageBreakBefore: 'always'
+            boxSizing: 'border-box',
+            display: 'flex',
+            flexDirection: 'column'
           }}>
             {/* Project Header */}
-            <div style={{ 
+            <div className="project-header" style={{ 
               borderBottom: `3px solid ${colors.border}`, 
-              paddingBottom: '24px', 
-              marginBottom: '32px',
+              paddingBottom: '20px', 
+              marginBottom: '24px',
               display: 'flex',
               justifyContent: 'space-between',
-              alignItems: 'flex-start'
+              alignItems: 'flex-start',
+              flexShrink: 0
             }}>
               <div>
                 <div style={{ fontSize: '12px', color: colors.textMuted, textTransform: 'uppercase', marginBottom: '8px' }}>
@@ -279,15 +295,22 @@ export default function PrintPortfolioPage() {
               )}
             </div>
 
-            {/* Gallery Grid */}
+            {/* Gallery Grid - Show max 3 images */}
             {project.media && project.media.length > 0 && (
-              <div style={{ marginBottom: '32px' }}>
+              <div className="project-gallery" style={{ 
+                marginBottom: '20px', 
+                flexShrink: 0,
+                height: '140px',
+                overflow: 'hidden'
+              }}>
                 <div style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: 'repeat(3, 1fr)', 
-                  gap: '12px' 
+                  gridTemplateColumns: '2fr 1fr', 
+                  gridTemplateRows: 'repeat(2, 65px)',
+                  gap: '10px',
+                  height: '100%'
                 }}>
-                  {project.media.slice(0, 6).map((media, mediaIndex) => {
+                  {project.media.slice(0, 3).map((media, mediaIndex) => {
                     const isVideo = media.type === 'video' || media.url?.includes('youtube') || media.url?.includes('youtu.be');
                     const imageSrc = isVideo ? getYouTubeThumbnail(media.url) : media.url;
                     const isMainImage = mediaIndex === 0;
@@ -296,20 +319,29 @@ export default function PrintPortfolioPage() {
                       <div 
                         key={mediaIndex}
                         style={{
-                          gridColumn: isMainImage ? 'span 2' : 'span 1',
+                          gridColumn: isMainImage ? 'span 1' : 'span 1',
                           gridRow: isMainImage ? 'span 2' : 'span 1',
-                          height: isMainImage ? '280px' : '130px',
                           backgroundColor: colors.bgSecondary,
-                          borderRadius: '8px',
+                          borderRadius: '6px',
                           overflow: 'hidden',
-                          border: `1px solid ${colors.border}`
+                          border: `1px solid ${colors.border}`,
+                          position: 'relative'
                         }}
                       >
                         {imageSrc && (
                           <img 
                             src={imageSrc}
                             alt={`${project.title} - Image ${mediaIndex + 1}`}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            style={{ 
+                              width: '100%', 
+                              height: '100%', 
+                              objectFit: 'cover', 
+                              display: 'block',
+                              position: 'absolute',
+                              top: 0,
+                              left: 0
+                            }}
+                            crossOrigin="anonymous"
                           />
                         )}
                       </div>
@@ -320,24 +352,46 @@ export default function PrintPortfolioPage() {
             )}
 
             {/* Content */}
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '32px' }}>
+            <div className="project-content" style={{ 
+              display: 'grid', 
+              gridTemplateColumns: '2fr 1fr', 
+              gap: '24px', 
+              flex: 1, 
+              minHeight: 0,
+              overflow: 'hidden'
+            }}>
               <div>
                 <h3 style={{ fontSize: '12px', fontWeight: 'bold', color: colors.textMuted, textTransform: 'uppercase', marginBottom: '12px' }}>
                   Description
                 </h3>
-                <p style={{ fontSize: '14px', color: colors.textSecondary, lineHeight: 1.8 }}>
+                <p className="desc-text" style={{ 
+                  fontSize: '13px', 
+                  color: colors.textSecondary, 
+                  lineHeight: 1.6, 
+                  margin: 0,
+                  textAlign: 'justify'
+                }}>
                   {project.description}
                 </p>
 
                 {project.impacts && project.impacts.length > 0 && (
-                  <div style={{ marginTop: '24px' }}>
-                    <h3 style={{ fontSize: '12px', fontWeight: 'bold', color: colors.textMuted, textTransform: 'uppercase', marginBottom: '12px' }}>
+                  <div style={{ marginTop: '12px' }}>
+                    <h3 style={{ fontSize: '11px', fontWeight: 'bold', color: colors.textMuted, textTransform: 'uppercase', marginBottom: '6px' }}>
                       Key Impacts
                     </h3>
                     <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                      {project.impacts.map((impact, i) => (
-                        <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '8px', fontSize: '14px', color: colors.textSecondary }}>
-                          <CheckCircle size={16} style={{ color: colors.success, marginTop: '2px', flexShrink: 0 }} />
+                      {project.impacts.slice(0, 4).map((impact, i) => (
+                        <li key={i} style={{ 
+                          display: 'flex', 
+                          alignItems: 'flex-start', 
+                          gap: '6px', 
+                          marginBottom: '4px', 
+                          fontSize: '11px', 
+                          color: colors.textSecondary, 
+                          lineHeight: 1.4,
+                          textAlign: 'justify'
+                        }}>
+                          <span style={{ color: colors.success, flexShrink: 0 }}>✓</span>
                           <span>{impact}</span>
                         </li>
                       ))}
@@ -347,22 +401,27 @@ export default function PrintPortfolioPage() {
               </div>
 
               <div>
-                <h3 style={{ fontSize: '12px', fontWeight: 'bold', color: colors.textMuted, textTransform: 'uppercase', marginBottom: '12px' }}>
+                <h3 style={{ fontSize: '11px', fontWeight: 'bold', color: colors.textMuted, textTransform: 'uppercase', marginBottom: '8px' }}>
                   Technologies Used
                 </h3>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  {project.tech_stack?.map((tech, i) => (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  {project.tech_stack?.slice(0, 8).map((tech, i) => (
                     <span key={i} style={{ 
-                      padding: '6px 12px', 
+                      padding: '4px 8px', 
                       backgroundColor: colors.tagBg, 
                       border: `1px solid ${colors.tagBorder}`,
-                      borderRadius: '4px',
-                      fontSize: '12px',
+                      borderRadius: '3px',
+                      fontSize: '11px',
                       color: colors.textSecondary
                     }}>
                       {tech}
                     </span>
                   ))}
+                  {project.tech_stack && project.tech_stack.length > 8 && (
+                    <span style={{ fontSize: '11px', color: colors.textMuted, fontStyle: 'italic' }}>
+                      +{project.tech_stack.length - 8} more
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -371,15 +430,26 @@ export default function PrintPortfolioPage() {
       </div>
 
       <style jsx global>{`
+        /* ===== PRINT STYLES ===== */
         @media print {
           @page {
             size: A4 portrait;
-            margin: 0;
+            margin: 15mm 12mm;
           }
           
-          body {
+          * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            color-adjust: exact !important;
+            -webkit-tap-highlight-color: transparent !important;
+          }
+          
+
+
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
           }
           
           .no-print {
@@ -390,16 +460,89 @@ export default function PrintPortfolioPage() {
             padding-top: 0 !important;
           }
           
+          /* Each page is a A4 container */
           .page {
+            width: 186mm; /* A4 width minus margins (210mm - 24mm) */
+            min-height: 267mm; /* A4 height minus margins (297mm - 30mm) */
             page-break-after: always;
             break-after: page;
+            break-inside: avoid;
+            overflow: visible;
+            position: relative;
+            box-sizing: border-box;
+            margin: 0 auto;
+            padding: 0;
+          }
+          
+          /* Last page shouldn't have page break */
+          .page:last-child {
+            page-break-after: auto;
+            break-after: auto;
+          }
+          
+          /* Prevent content from breaking inside */
+          .project-header,
+          .project-gallery,
+          .project-content {
+            break-inside: avoid;
+            position: relative;
+          }
+          
+          /* Ensure images don't break and don't overlap */
+          img {
+            break-inside: avoid;
+            max-width: 100%;
+            position: relative !important;
+          }
+          
+          /* Force proper box model for all elements */
+          .page * {
+            box-sizing: border-box;
+          }
+          
+          /* Ensure text doesn't overflow */
+          p, li {
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            hyphens: auto;
+          }
+          
+
+          /* Links - show URL after text */
+          a[href]:after {
+            content: "";
           }
         }
         
+        /* ===== SCREEN PREVIEW STYLES ===== */
         @media screen {
           .page {
-            border-bottom: 3px dashed ${colors.border};
-            margin-bottom: 20px;
+            width: 210mm;
+            min-height: 297mm;
+            margin: 20px auto;
+            background: ${colors.bg};
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            border-bottom: none;
+            overflow: visible;
+            position: relative;
+            box-sizing: border-box;
+          }
+          
+          /* Show page boundaries for debugging */
+          .page::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: repeating-linear-gradient(
+              90deg,
+              ${colors.border} 0px,
+              ${colors.border} 10px,
+              transparent 10px,
+              transparent 20px
+            );
           }
         }
       `}</style>
