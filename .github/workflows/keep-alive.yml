@@ -13,25 +13,41 @@ jobs:
     steps:
       - name: Ping Supabase
         env:
-          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || vars.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: |
           if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_KEY" ]; then
-            echo "Error: Secrets not set. Skipping ping."
-            exit 1
+            echo "::warning::Supabase keep-alive skipped because NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY is not configured in repository Secrets/Variables."
+            exit 0
           fi
-          
+
+          if ! echo "$SUPABASE_URL" | grep -Eq '^https://'; then
+            echo "::warning::Supabase keep-alive skipped because NEXT_PUBLIC_SUPABASE_URL is not a valid https URL."
+            exit 0
+          fi
+
+          ping_url="$SUPABASE_URL/rest/v1/projects?select=id&limit=1"
           echo "Pinging REST API to keep Supabase active..."
-          response=$(curl -s -o /dev/null -w "%{http_code}" -X GET "$SUPABASE_URL/rest/v1/projects?select=id&limit=1" \
+          echo "Target host: $(echo "$SUPABASE_URL" | sed -E 's#https://([^/]+).*#\1#')"
+
+          curl_exit=0
+          response=$(curl -sS --max-time 20 -o /tmp/supabase_ping_response.txt -w "%{http_code}" -X GET "$ping_url" \
             -H "apikey: $SUPABASE_KEY" \
-            -H "Authorization: Bearer $SUPABASE_KEY")
-            
-          echo "Response status code: $response"
-          
+            -H "Authorization: Bearer $SUPABASE_KEY") || curl_exit=$?
+
+          echo "Response status code: ${response:-none}"
+
+          if [ "$curl_exit" -ne 0 ]; then
+            echo "::warning::curl failed during Supabase keep-alive (exit code: $curl_exit)."
+            echo "Response body (if any):"
+            cat /tmp/supabase_ping_response.txt || true
+            exit 0
+          fi
+
           if [ "$response" -eq 200 ] || [ "$response" -eq 206 ]; then
             echo "Success: Supabase is active."
           else
-            echo "Warning: Received unexpected status code $response"
-            # Don't fail the job to avoid spamming notification emails for minor glitches, 
-            # unless it's critical. 
+            echo "::warning::Received unexpected status code $response from Supabase keep-alive endpoint."
+            echo "Response body:"
+            cat /tmp/supabase_ping_response.txt || true
           fi
